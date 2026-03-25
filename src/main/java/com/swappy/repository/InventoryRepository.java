@@ -16,9 +16,7 @@ public interface InventoryRepository extends JpaRepository<Inventory, Long>{
 
 	public void deleteByDateAfterAndRoom(LocalDate date, Room room);
 	
-	@Modifying
-	@Query("DELETE FROM Inventory i WHERE i.room.id = :roomId")
-	public void deleteByRoomId(@Param("roomId") Long roomId);
-	
+	public long deleteByRoom_Id(Long roomId);
+
 	public boolean existsByHotelIdAndRoomIdAndDate(Long hotelId, Long roomId, LocalDate date);
 }

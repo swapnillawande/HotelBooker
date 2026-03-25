@@ -25,7 +25,8 @@ public class InventoryServiceImpl implements InventoryService{
 		
 		
 		for(;!today.isAfter(enddate); today =today.plusDays(1)) {
-			boolean inventoryAlreadyExists = inventoryRepository.existsByHotelIdAndRoomIdAndDate(room.getHotel().getId(), room.getId(), today);
+			boolean inventoryAlreadyExists = inventoryRepository
+					.existsByHotelIdAndRoomIdAndDate(room.getHotel().getId(), room.getId(), today);
 			
 			if (inventoryAlreadyExists) {
 				continue;
@@ -61,7 +62,7 @@ public class InventoryServiceImpl implements InventoryService{
 	
 	@Override
 	public void deleteInventoriesByRoomId(Long roomId) {
-		inventoryRepository.deleteByRoomId(roomId);
+		inventoryRepository.deleteByRoom_Id(roomId);
 		inventoryRepository.flush();
 	}
 
