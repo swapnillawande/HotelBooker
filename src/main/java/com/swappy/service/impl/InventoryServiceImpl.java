@@ -25,6 +25,11 @@ public class InventoryServiceImpl implements InventoryService{
 		
 		
 		for(;!today.isAfter(enddate); today =today.plusDays(1)) {
+			boolean inventoryAlreadyExists = inventoryRepository.existsByHotelIdAndRoomIdAndDate(room.getHotel().getId(), room.getId(), today);
+			
+			if (inventoryAlreadyExists) {
+				continue;
+			}
 			
 			Inventory inventory = new Inventory();
 			inventory.setHotel(room.getHotel());
