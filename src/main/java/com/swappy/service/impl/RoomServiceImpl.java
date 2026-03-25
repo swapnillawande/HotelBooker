@@ -17,6 +17,8 @@ import com.swappy.repository.RoomRepository;
 import com.swappy.service.InventoryService;
 import com.swappy.service.RoomService;
 
+import jakarta.transaction.Transactional;
+
 @Service
 public class RoomServiceImpl implements RoomService{
 
@@ -88,6 +90,7 @@ public class RoomServiceImpl implements RoomService{
 	}
 
 	@Override
+	@Transactional
 	public void deleteRoomById(Long roomId) {
 		
 		Room room = roomRepository.findById(roomId)

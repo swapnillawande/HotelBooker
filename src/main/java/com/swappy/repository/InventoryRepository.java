@@ -13,5 +13,7 @@ public interface InventoryRepository extends JpaRepository<Inventory, Long>{
 
 	public void deleteByDateAfterAndRoom(LocalDate date, Room room);
 	
+	public void deleteByRoom(Room room);
+	
 	public boolean existsByHotelIdAndRoomIdAndDate(Long hotelId, Long roomId, LocalDate date);
 }
