@@ -8,5 +8,6 @@ public interface InventoryService {
 	
 	public void deleteFutureInventories(Room room);
 	
-	public void deleteInventoriesByRoom(Room room);
+	public void deleteInventoriesByRoomId(Long roomId);
+	
 }

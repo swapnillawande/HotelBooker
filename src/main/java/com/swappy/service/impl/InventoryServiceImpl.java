@@ -60,8 +60,9 @@ public class InventoryServiceImpl implements InventoryService{
 	
 	
 	@Override
-	public void deleteInventoriesByRoom(Room room) {
-		inventoryRepository.deleteByRoom(room);
+	public void deleteInventoriesByRoomId(Long roomId) {
+		inventoryRepository.deleteByRoomId(roomId);
+		inventoryRepository.flush();
 	}
 
 	
