@@ -2,10 +2,18 @@ package com.swappy.service.impl;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import com.swappy.dto.HotelDto;
+import com.swappy.dto.HotelSearchDto;
+import com.swappy.entities.Hotel;
 import com.swappy.entities.Inventory;
 import com.swappy.entities.Room;
 import com.swappy.repository.InventoryRepository;
@@ -16,6 +24,9 @@ public class InventoryServiceImpl implements InventoryService{
 
 	@Autowired
 	private InventoryRepository inventoryRepository;
+	
+	@Autowired
+	private ModelMapper modelMapper; 
 	
 	@Override
 	public void initializeRoomForAYear(Room room) {
@@ -64,6 +75,26 @@ public class InventoryServiceImpl implements InventoryService{
 	public void deleteInventoriesByRoomId(Long roomId) {
 		inventoryRepository.deleteByRoom_Id(roomId);
 		inventoryRepository.flush();
+	}
+
+	@Override
+	public Page<HotelDto> searchHotels(HotelSearchDto hotelSearchDto) {
+		
+		Pageable pageable = PageRequest.of(hotelSearchDto.getPage(), hotelSearchDto.getSize());
+		
+		long dateCount = ChronoUnit.DAYS.between(
+		        hotelSearchDto.getStartDate(),
+		        hotelSearchDto.getEndDate()
+		) + 1;
+		
+		Page<Hotel> hotelPage = inventoryRepository.findHotelsWithAvailableInventory(
+				hotelSearchDto.getCity(), 
+				hotelSearchDto.getStartDate(), 
+				hotelSearchDto.getEndDate(), 
+				hotelSearchDto.getRoomCount(), 
+				dateCount, pageable);
+		
+		return hotelPage.map((ele) -> modelMapper.map(ele, HotelDto.class));
 	}
 
 	
