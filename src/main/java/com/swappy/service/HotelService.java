@@ -1,6 +1,9 @@
 package com.swappy.service;
 
+import org.jspecify.annotations.Nullable;
+
 import com.swappy.dto.HotelDto;
+import com.swappy.dto.HotelInfoDto;
 import com.swappy.entities.Hotel;
 
 public interface HotelService {
@@ -14,5 +17,7 @@ public interface HotelService {
 	public Boolean deleteHotelById(Long id);
 	
 	public void activateHotel(Long id);
+
+	public HotelInfoDto getHotelInfoById(Long hotelId);
 	
 }

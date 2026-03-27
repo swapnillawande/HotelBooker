@@ -1,5 +1,7 @@
 package com.swappy.service.impl;
 
+import java.util.List;
+
 import org.apache.commons.logging.Log;
 import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
@@ -9,6 +11,8 @@ import org.springframework.stereotype.Service;
 
 import com.swappy.config.MapperConfig;
 import com.swappy.dto.HotelDto;
+import com.swappy.dto.HotelInfoDto;
+import com.swappy.dto.RoomDto;
 import com.swappy.entities.Hotel;
 import com.swappy.entities.Room;
 import com.swappy.exception.ResourceNotFoundException;
@@ -144,6 +148,26 @@ public class HotelServiceImpl implements HotelService{
 		}
 		
 		
+	}
+
+	@Override
+	public HotelInfoDto getHotelInfoById(Long hotelId) {
+		
+		logger.info("Getting the hotel with ID: "+hotelId);
+
+		
+		Hotel hotel=  hotelRepository
+				.findById(hotelId)
+				.orElseThrow(() -> new ResourceNotFoundException("Hotel not found with id: " + hotelId));
+		
+		
+		List<RoomDto> rooms = hotel.getRooms()
+							  .stream()
+							  .map((ele) -> modelMapper.map(ele, RoomDto.class)).toList();
+		
+		
+		
+		return new HotelInfoDto(modelMapper.map(hotel, HotelDto.class), rooms);
 	}
 }
 
