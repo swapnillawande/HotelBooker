@@ -45,6 +45,9 @@ public class Inventory {
     @Column(nullable = false, columnDefinition = "INTEGER  DEFAULT 0")
     private Integer bookedCount;
     
+    @Column(nullable = false, columnDefinition = "INTEGER  DEFAULT 0")
+    private Integer reservedCount;
+    
     @Column(nullable = false)
     private Integer totalCount;
 
@@ -183,6 +186,14 @@ public class Inventory {
 
 	public void setUpdatedAt(LocalDateTime updatedAt) {
 		this.updatedAt = updatedAt;
+	}
+
+	public Integer getReservedCount() {
+		return reservedCount;
+	}
+
+	public void setReservedCount(Integer reservedCount) {
+		this.reservedCount = reservedCount;
 	}
     
     

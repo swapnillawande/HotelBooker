@@ -1,10 +1,12 @@
 package com.swappy.repository;
 
 import java.time.LocalDate;
+import java.util.*;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -13,6 +15,8 @@ import org.springframework.stereotype.Repository;
 import com.swappy.entities.Hotel;
 import com.swappy.entities.Inventory;
 import com.swappy.entities.Room;
+
+import jakarta.persistence.LockModeType;
 
 @Repository
 public interface InventoryRepository extends JpaRepository<Inventory, Long>{
@@ -30,7 +34,7 @@ public interface InventoryRepository extends JpaRepository<Inventory, Long>{
 			WHERE i.city = :city 
 				AND i.date BETWEEN :startDate AND :endDate 
 				AND i.closed = false 
-				AND (i.totalCount - i.bookedCount) >= :roomsCount
+				AND (i.totalCount - i.bookedCount - i.reservedCount) >= :roomsCount
 			GROUP BY i.hotel, i.room
 			HAVING COUNT(i.date) = :dateCount
 			""")
@@ -45,6 +49,23 @@ public interface InventoryRepository extends JpaRepository<Inventory, Long>{
 
 			
 			);
+	
+	
+	@Query("""
+		    SELECT i
+		    FROM Inventory i
+		    WHERE i.room.id = :roomId
+		      AND i.date BETWEEN :startDate AND :endDate
+		      AND i.closed = false
+		      AND (i.totalCount - i.bookedCount - i.reservedCount) >= :roomsCount
+		""")
+		@Lock(LockModeType.PESSIMISTIC_WRITE)
+		List<Inventory> findAndLockAvailableInventory(
+		    @Param("roomId") Long roomId,
+		    @Param("startDate") LocalDate startDate,
+		    @Param("endDate") LocalDate endDate,
+		    @Param("roomsCount") Integer roomsCount
+		);
 	
 	
 }
