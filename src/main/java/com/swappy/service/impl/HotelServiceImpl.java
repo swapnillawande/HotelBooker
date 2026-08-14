@@ -2,14 +2,11 @@ package com.swappy.service.impl;
 
 import java.util.List;
 
-import org.apache.commons.logging.Log;
 import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.swappy.config.MapperConfig;
 import com.swappy.dto.HotelDto;
 import com.swappy.dto.HotelInfoDto;
 import com.swappy.dto.RoomDto;
@@ -26,17 +23,14 @@ import lombok.extern.slf4j.Slf4j;
 
 @Service
 @Slf4j
-@RequiredArgsConstructor
+	@RequiredArgsConstructor
 public class HotelServiceImpl implements HotelService{
 
-	@Autowired
-	private HotelRepository hotelRepository; 
+	private final HotelRepository hotelRepository;
 	
-	@Autowired
-	private InventoryService inventoryService;
+	private final InventoryService inventoryService;
 	
-	@Autowired
-	private ModelMapper modelMapper;
+	private final ModelMapper modelMapper;
 	
 	Logger logger = LoggerFactory.getLogger(HotelServiceImpl.class);
 
@@ -52,7 +46,7 @@ public class HotelServiceImpl implements HotelService{
 		
 		hotel=  hotelRepository.save(hotel);
 		
-		logger.info("Created hotel with id: "+ hotelDto.getId());
+		logger.info("Created hotel with id: "+ hotel.getId());
 
 		
 		return modelMapper.map(hotel, HotelDto.class);
@@ -81,9 +75,10 @@ public class HotelServiceImpl implements HotelService{
 		
 		logger.info("Updating the hotel with ID: "+id);
 		
-		hotel = modelMapper.map(hotelDto, Hotel.class);
+		modelMapper.map(hotelDto, hotel);
+		hotel.setId(id);
 		
-		hotelRepository.save(hotel);
+		hotel = hotelRepository.save(hotel);
 		
 		logger.info("Updated the hotel with ID: "+id);
 
@@ -94,27 +89,20 @@ public class HotelServiceImpl implements HotelService{
 	@Override
 	@Transactional
 	public Boolean deleteHotelById(Long id) {
-		// TODO Auto-generated method stub
-		
 		Hotel hotel=  hotelRepository
 				.findById(id)
 				.orElseThrow(() -> new ResourceNotFoundException("Hotel not found with id: " + id));
 		
-		if (findHotelById(id)) {
-			logger.info("Deleting the hotel with ID: "+ id);
-			hotelRepository.deleteById(id);
-			logger.info("Deleted the hotel with ID: "+ id);
-			
-			
-			
-			for(Room room: hotel.getRooms()) {
+		logger.info("Deleting the hotel with ID: "+ id);
+		if (hotel.getRooms() != null) {
+			for (Room room : hotel.getRooms()) {
 				inventoryService.deleteFutureInventories(room);
 			}
-
 		}
-		logger.info("Hotel not found with ID: "+ id);
+		hotelRepository.delete(hotel);
+		logger.info("Deleted the hotel with ID: "+ id);
 
-		return false;
+		return true;
 	}
 	
 	
@@ -170,8 +158,6 @@ public class HotelServiceImpl implements HotelService{
 		return new HotelInfoDto(modelMapper.map(hotel, HotelDto.class), rooms);
 	}
 }
-
-
 
 
 
