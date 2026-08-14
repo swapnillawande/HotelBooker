@@ -10,6 +10,11 @@ export const demoHotels = [
     tag: 'Guest favourite',
     image: 'https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?auto=format&fit=crop&w=1200&q=82',
     amenities: ['Central location', 'Free Wi-Fi', '24h bar'],
+    rooms: [
+      { id: 101, type: 'Twin private room', basePrice: 62, capacity: 2, totalCount: 12, amenities: ['Private bathroom', 'Linen included', 'Quiet floor'] },
+      { id: 102, type: 'Family room', basePrice: 88, capacity: 4, totalCount: 8, amenities: ['Four beds', 'Private bathroom', 'Kids welcome'] },
+      { id: 103, type: 'Shared dorm bed', basePrice: 22, capacity: 6, totalCount: 24, amenities: ['Secure locker', 'Reading light', 'Shared lounge'] },
+    ],
   },
   {
     id: 2,
@@ -22,6 +27,10 @@ export const demoHotels = [
     tag: 'Best value',
     image: 'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=1200&q=82',
     amenities: ['Family rooms', 'Breakfast', 'Games room'],
+    rooms: [
+      { id: 201, type: 'Double room', basePrice: 58, capacity: 2, totalCount: 10, amenities: ['Harbour view', 'Private bathroom', 'Towels'] },
+      { id: 202, type: 'Shared dorm bed', basePrice: 19, capacity: 8, totalCount: 32, amenities: ['Secure locker', 'Reading light', 'Guest kitchen'] },
+    ],
   },
   {
     id: 3,
@@ -34,5 +43,9 @@ export const demoHotels = [
     tag: 'Top rated',
     image: 'https://images.unsplash.com/photo-1590490360182-c33d57733427?auto=format&fit=crop&w=1200&q=82',
     amenities: ['River nearby', 'Guest kitchen', 'Bike rental'],
+    rooms: [
+      { id: 301, type: 'Comfort private room', basePrice: 49, capacity: 2, totalCount: 14, amenities: ['City view', 'Private bathroom', 'Work desk'] },
+      { id: 302, type: 'Shared dorm bed', basePrice: 14, capacity: 6, totalCount: 30, amenities: ['Secure locker', 'Reading light', 'Shared lounge'] },
+    ],
   },
 ]

@@ -11,6 +11,7 @@ export default function Header() {
         <a href="#stays">Stays</a>
         <a href="#why">Why Stayly</a>
         <a href="#groups">Groups</a>
+        <Link to="/admin">Property admin</Link>
       </nav>
       <div className="header-actions">
         <button className="language-button" type="button" aria-label="Change language">EN · €</button>

@@ -1,4 +1,5 @@
 import { demoHotels } from '../data/demoHotels'
+import { apiRequest } from './client'
 
 export async function searchHotels(criteria) {
   const getDemoResults = () => {
@@ -8,9 +9,8 @@ export async function searchHotels(criteria) {
   }
 
   try {
-    const response = await fetch('/api/v1/hotels/search', {
+    const page = await apiRequest('/hotels/search', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         city: criteria.city,
         startDate: criteria.checkIn,
@@ -21,8 +21,6 @@ export async function searchHotels(criteria) {
       }),
     })
 
-    if (!response.ok) throw new Error(`Search failed with status ${response.status}`)
-    const page = await response.json()
     const hotels = (page.content ?? []).map((hotel, index) => ({
       ...demoHotels[index % demoHotels.length],
       ...hotel,
@@ -31,4 +29,40 @@ export async function searchHotels(criteria) {
   } catch {
     return getDemoResults()
   }
+}
+
+export async function getHotelInfo(hotelId) {
+  return apiRequest(`/hotels/${hotelId}/info`)
+}
+
+export async function createHotel(hotel) {
+  return apiRequest('/admin/hotels', { method: 'POST', body: JSON.stringify(hotel) })
+}
+
+export async function getAdminHotel(hotelId) {
+  return apiRequest(`/admin/hotels/${hotelId}`)
+}
+
+export async function updateHotel(hotelId, hotel) {
+  return apiRequest(`/admin/hotels/${hotelId}`, { method: 'PUT', body: JSON.stringify(hotel) })
+}
+
+export async function activateHotel(hotelId) {
+  return apiRequest(`/admin/hotels/${hotelId}/activate`, { method: 'PATCH' })
+}
+
+export async function deleteHotel(hotelId) {
+  return apiRequest(`/admin/hotels/${hotelId}`, { method: 'DELETE' })
+}
+
+export async function getHotelRooms(hotelId) {
+  return apiRequest(`/admin/hotels/${hotelId}/rooms`)
+}
+
+export async function createRoom(hotelId, room) {
+  return apiRequest(`/admin/hotels/${hotelId}/rooms`, { method: 'POST', body: JSON.stringify(room) })
+}
+
+export async function deleteRoom(hotelId, roomId) {
+  return apiRequest(`/admin/hotels/${hotelId}/rooms/${roomId}`, { method: 'DELETE' })
 }
