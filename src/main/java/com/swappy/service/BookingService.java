@@ -13,6 +13,8 @@ public interface BookingService {
 
 	public BookingDto addGuests(Long bookingId, List<GuestDto> guestDtoList);
 
+	public BookingDto confirmBooking(Long bookingId);
+
 	
 	
 }

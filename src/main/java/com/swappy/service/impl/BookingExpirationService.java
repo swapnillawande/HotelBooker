@@ -31,8 +31,8 @@ public class BookingExpirationService {
     @Transactional
     public void expireStaleReservations() {
         LocalDateTime cutoff = LocalDateTime.now().minusMinutes(HOLD_MINUTES);
-        List<Booking> staleBookings = bookingRepository.findByBookingStatusAndCreatedAtBefore(
-                BookingStatus.RESERVED,
+        List<Booking> staleBookings = bookingRepository.findByBookingStatusInAndCreatedAtBefore(
+                List.of(BookingStatus.RESERVED, BookingStatus.GUEST_ADDED),
                 cutoff);
 
         for (Booking booking : staleBookings) {

@@ -53,7 +53,8 @@ class BookingExpirationServiceTests {
         booking.setBookingStatus(BookingStatus.RESERVED);
         Inventory firstNight = inventory(4);
         Inventory secondNight = inventory(1);
-        when(bookingRepository.findByBookingStatusAndCreatedAtBefore(eq(BookingStatus.RESERVED), any()))
+        when(bookingRepository.findByBookingStatusInAndCreatedAtBefore(
+                eq(List.of(BookingStatus.RESERVED, BookingStatus.GUEST_ADDED)), any()))
                 .thenReturn(List.of(booking));
         when(inventoryRepository.findAndLockInventoryForBooking(5L, checkIn, checkOut))
                 .thenReturn(List.of(firstNight, secondNight));
@@ -69,7 +70,8 @@ class BookingExpirationServiceTests {
 
     @Test
     void doesNotWriteWhenNoReservationsAreStale() {
-        when(bookingRepository.findByBookingStatusAndCreatedAtBefore(eq(BookingStatus.RESERVED), any()))
+        when(bookingRepository.findByBookingStatusInAndCreatedAtBefore(
+                eq(List.of(BookingStatus.RESERVED, BookingStatus.GUEST_ADDED)), any()))
                 .thenReturn(List.of());
 
         expirationService.expireStaleReservations();
