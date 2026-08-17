@@ -2,7 +2,6 @@ package com.swappy.controller;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -19,6 +18,7 @@ import com.swappy.dto.HotelDto;
 import com.swappy.service.HotelService;
 
 import lombok.RequiredArgsConstructor;
+import jakarta.validation.Valid;
 
 
 @RestController
@@ -28,12 +28,11 @@ public class HotelController {
 	
 	Logger logger = LoggerFactory.getLogger(HotelController.class);
 	
-	@Autowired
-	private HotelService hotelService;
+	private final HotelService hotelService;
 	
 	
 	@PostMapping
-	public ResponseEntity<HotelDto> createNewHotel(@RequestBody HotelDto hotelDto) {
+	public ResponseEntity<HotelDto> createNewHotel(@Valid @RequestBody HotelDto hotelDto) {
 		
 	  HotelDto hotel = hotelService.createNewHotel(hotelDto);
 	  
@@ -52,7 +51,7 @@ public class HotelController {
 
     
     @PutMapping("/{id}")
-    public ResponseEntity<HotelDto> updateHotelById(@PathVariable("id") Long id, @RequestBody HotelDto hotelDto){
+    public ResponseEntity<HotelDto> updateHotelById(@PathVariable("id") Long id, @Valid @RequestBody HotelDto hotelDto){
     	
         HotelDto hotel = hotelService.updateHotelById(id, hotelDto);
     	

@@ -32,7 +32,7 @@ public interface InventoryRepository extends JpaRepository<Inventory, Long>{
 			SELECT DISTINCT i.hotel
 			FROM Inventory i
 			WHERE i.city = :city 
-				AND i.date BETWEEN :startDate AND :endDate 
+				AND i.date >= :startDate AND i.date < :endDate
 				AND i.closed = false 
 				AND (i.totalCount - i.bookedCount - i.reservedCount) >= :roomsCount
 			GROUP BY i.hotel, i.room
@@ -55,7 +55,7 @@ public interface InventoryRepository extends JpaRepository<Inventory, Long>{
 		    SELECT i
 		    FROM Inventory i
 		    WHERE i.room.id = :roomId
-		      AND i.date BETWEEN :startDate AND :endDate
+		      AND i.date >= :startDate AND i.date < :endDate
 		      AND i.closed = false
 		      AND (i.totalCount - i.bookedCount - i.reservedCount) >= :roomsCount
 		""")
@@ -66,6 +66,19 @@ public interface InventoryRepository extends JpaRepository<Inventory, Long>{
 		    @Param("endDate") LocalDate endDate,
 		    @Param("roomsCount") Integer roomsCount
 		);
+
+	@Query("""
+			SELECT i
+			FROM Inventory i
+			WHERE i.room.id = :roomId
+			  AND i.date >= :startDate AND i.date < :endDate
+			""")
+	@Lock(LockModeType.PESSIMISTIC_WRITE)
+	List<Inventory> findAndLockInventoryForBooking(
+			@Param("roomId") Long roomId,
+			@Param("startDate") LocalDate startDate,
+			@Param("endDate") LocalDate endDate
+	);
 	
 	
 }

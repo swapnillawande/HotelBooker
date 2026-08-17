@@ -10,9 +10,9 @@ public interface RoomService {
 	
 	public List<RoomDto> getAllRoomsInHotel(Long hotelId);
 	
-	public RoomDto getRoomById(Long roomId);
+	public RoomDto getRoomById(Long hotelId, Long roomId);
 	
-	public void deleteRoomById(Long roomId);
+	public void deleteRoomById(Long hotelId, Long roomId);
 	
 	
 }

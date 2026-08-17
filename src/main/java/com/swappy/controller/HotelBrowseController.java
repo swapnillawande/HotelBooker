@@ -1,9 +1,5 @@
 package com.swappy.controller;
 
-import java.util.List;
-
-
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -19,19 +15,21 @@ import com.swappy.dto.HotelSearchDto;
 import com.swappy.service.HotelService;
 import com.swappy.service.InventoryService;
 
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+
 @RestController
 @RequestMapping("/hotels")
+@RequiredArgsConstructor
 public class HotelBrowseController {
 
-	@Autowired
-	private InventoryService inventoryService;
+	private final InventoryService inventoryService;
 	
-	@Autowired
-	private HotelService hotelService;
+	private final HotelService hotelService;
 	
 	
 	@PostMapping("/search")
-	public ResponseEntity<Page <HotelDto>> searchHotels(@RequestBody HotelSearchDto hotelSearchDto ){
+	public ResponseEntity<Page <HotelDto>> searchHotels(@Valid @RequestBody HotelSearchDto hotelSearchDto ){
 		
 		Page<HotelDto> page = inventoryService.searchHotels(hotelSearchDto);
 		
@@ -40,7 +38,7 @@ public class HotelBrowseController {
 	
 	
 	@GetMapping("/{hotelId}/info")
-	private ResponseEntity<HotelInfoDto> getHotelInfo(@PathVariable("hotelId") Long hotelId){
+	public ResponseEntity<HotelInfoDto> getHotelInfo(@PathVariable("hotelId") Long hotelId){
 		
 		
 		return ResponseEntity.ok(hotelService.getHotelInfoById(hotelId));
