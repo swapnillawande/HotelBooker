@@ -9,10 +9,26 @@ export default function SearchPage() {
   const criteria = Object.fromEntries(params)
   const [hotels, setHotels] = useState([])
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
 
   useEffect(() => {
+    let cancelled = false
     setLoading(true)
-    searchHotels(criteria).then(setHotels).finally(() => setLoading(false))
+    setError('')
+    searchHotels(criteria)
+      .then((results) => {
+        if (!cancelled) setHotels(results)
+      })
+      .catch((requestError) => {
+        if (!cancelled) {
+          setHotels([])
+          setError(requestError.message || 'We could not load stays. Please try again.')
+        }
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false)
+      })
+    return () => { cancelled = true }
   }, [params.toString()])
 
   return (
@@ -26,8 +42,13 @@ export default function SearchPage() {
           <fieldset><legend>Facilities</legend>{['Breakfast', 'Guest kitchen', 'Parking'].map((item) => <label key={item}><input type="checkbox" /> {item}</label>)}</fieldset>
         </aside>
         <div className="results-main">
-          <div className="results-heading"><div><span className="eyebrow">{criteria.checkIn} — {criteria.checkOut}</span><h1>Stays in {criteria.city || 'Europe'}</h1><p>{loading ? 'Finding your best options…' : `${hotels.length} welcoming stays ready for you`}</p></div><select aria-label="Sort results"><option>Our top picks</option><option>Lowest price</option><option>Highest rating</option></select></div>
-          <div className="results-list">{loading ? [1,2,3].map((item) => <div className="hotel-skeleton" key={item} />) : hotels.map((hotel) => <HotelCard hotel={hotel} horizontal key={hotel.id} />)}</div>
+          <div className="results-heading"><div><span className="eyebrow">{criteria.checkIn} — {criteria.checkOut}</span><h1>Stays in {criteria.city || 'Europe'}</h1><p>{loading ? 'Finding your best options…' : error ? 'We could not load stays' : `${hotels.length} welcoming stays ready for you`}</p></div><select aria-label="Sort results"><option>Our top picks</option><option>Lowest price</option><option>Highest rating</option></select></div>
+          <div className="results-list">
+            {loading && [1,2,3].map((item) => <div className="hotel-skeleton" key={item} />)}
+            {!loading && error && <div className="form-message error" role="alert">{error}</div>}
+            {!loading && !error && hotels.length === 0 && <div className="empty-state">No stays are available for these dates. Try another city or date range.</div>}
+            {!loading && !error && hotels.map((hotel) => <HotelCard hotel={hotel} horizontal key={hotel.id} />)}
+          </div>
         </div>
       </section>
     </main>

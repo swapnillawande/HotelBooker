@@ -2,6 +2,7 @@ import { demoHotels } from '../data/demoHotels'
 import { apiRequest } from './client'
 
 export async function searchHotels(criteria) {
+  const demoFallbackEnabled = import.meta.env.VITE_ENABLE_DEMO_FALLBACK === 'true'
   const getDemoResults = () => {
     const city = criteria.city.trim().toLowerCase()
     const matching = demoHotels.filter((hotel) => hotel.city.toLowerCase().includes(city))
@@ -25,9 +26,10 @@ export async function searchHotels(criteria) {
       ...demoHotels[index % demoHotels.length],
       ...hotel,
     }))
-    return hotels.length ? hotels : getDemoResults()
-  } catch {
-    return getDemoResults()
+    return hotels
+  } catch (error) {
+    if (demoFallbackEnabled) return getDemoResults()
+    throw error
   }
 }
 
