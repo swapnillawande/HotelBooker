@@ -55,6 +55,7 @@ public class HotelServiceImpl implements HotelService{
 	}
 
 	@Override
+	@Transactional
 	public HotelDto getHotelById(Long id) {
 
 		logger.info("Getting hotel with id: "+ id);
@@ -139,6 +140,7 @@ public class HotelServiceImpl implements HotelService{
 	}
 
 	@Override
+	@Transactional
 	public HotelInfoDto getHotelInfoById(Long hotelId) {
 		
 		logger.info("Getting the hotel with ID: "+hotelId);
@@ -158,7 +160,6 @@ public class HotelServiceImpl implements HotelService{
 		return new HotelInfoDto(modelMapper.map(hotel, HotelDto.class), rooms);
 	}
 }
-
 
 
 

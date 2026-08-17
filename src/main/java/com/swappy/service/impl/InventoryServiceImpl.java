@@ -21,6 +21,8 @@ import com.swappy.entities.Room;
 import com.swappy.repository.InventoryRepository;
 import com.swappy.service.InventoryService;
 
+import jakarta.transaction.Transactional;
+
 @Service
 public class InventoryServiceImpl implements InventoryService {
 
@@ -99,6 +101,7 @@ public class InventoryServiceImpl implements InventoryService {
     }
 
     @Override
+    @Transactional
     public Page<HotelDto> searchHotels(HotelSearchDto hotelSearchDto) {
 		if (!hotelSearchDto.getEndDate().isAfter(hotelSearchDto.getStartDate())) {
 			throw new IllegalArgumentException("End date must be after start date");
