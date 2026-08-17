@@ -30,6 +30,13 @@ The Vite server proxies `/api` to `http://localhost:8080` by default. To use a b
 VITE_API_TARGET=http://localhost:8081 npm run dev -- --port 5174
 ```
 
+Backend errors and empty searches are shown honestly in the UI. To deliberately
+use the bundled hotel catalog while designing without a backend, opt in with:
+
+```bash
+VITE_ENABLE_DEMO_FALLBACK=true npm run dev
+```
+
 ## Available routes
 
 | Route | Purpose |
