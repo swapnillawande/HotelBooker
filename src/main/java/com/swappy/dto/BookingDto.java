@@ -13,6 +13,7 @@ public class BookingDto {
     private Long hotelId;
     private Long roomId;
     private Integer roomsCount;
+    private String managementToken;
     private LocalDate checkInDate;
     private LocalDate checkOutDate;
     private LocalDateTime createdAt;
@@ -29,6 +30,8 @@ public class BookingDto {
     public void setRoomId(Long roomId) { this.roomId = roomId; }
     public Integer getRoomsCount() { return roomsCount; }
     public void setRoomsCount(Integer roomsCount) { this.roomsCount = roomsCount; }
+    public String getManagementToken() { return managementToken; }
+    public void setManagementToken(String managementToken) { this.managementToken = managementToken; }
     public LocalDate getCheckInDate() { return checkInDate; }
     public void setCheckInDate(LocalDate checkInDate) { this.checkInDate = checkInDate; }
     public LocalDate getCheckOutDate() { return checkOutDate; }
