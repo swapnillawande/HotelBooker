@@ -11,6 +11,8 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import com.swappy.exception.ResourceNotFoundException;
 
+import jakarta.validation.ConstraintViolationException;
+
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
@@ -18,6 +20,14 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ApiResponse<?>> handleValidation(MethodArgumentNotValidException exception) {
         List<String> errors = exception.getBindingResult().getFieldErrors().stream()
                 .map(error -> error.getField() + ": " + error.getDefaultMessage())
+                .toList();
+        return errorResponse(HttpStatus.BAD_REQUEST, "Request validation failed", errors);
+    }
+
+    @ExceptionHandler(ConstraintViolationException.class)
+    public ResponseEntity<ApiResponse<?>> handleConstraintViolation(ConstraintViolationException exception) {
+        List<String> errors = exception.getConstraintViolations().stream()
+                .map(violation -> violation.getPropertyPath() + ": " + violation.getMessage())
                 .toList();
         return errorResponse(HttpStatus.BAD_REQUEST, "Request validation failed", errors);
     }

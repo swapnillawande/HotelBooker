@@ -149,9 +149,10 @@ public class BookingServiceImpl implements BookingService{
 	        booking.setGuests(new HashSet<>());
 	    }
 
+	    User currentUser = getCurrentUser();
 	    for (GuestDto guestDto : guestDtoList) {
 	        Guest guest = modelMapper.map(guestDto, Guest.class);
-	        guest.setUser(getCurrentUser());
+	        guest.setUser(currentUser);
 	        Guest savedGuest = guestRepository.save(guest);
 	        booking.getGuests().add(savedGuest);
 	    }
@@ -205,7 +206,6 @@ public class BookingServiceImpl implements BookingService{
 	}
 	
 }
-
 
 
 
