@@ -1,6 +1,7 @@
 package com.swappy.dto;
 
 
+import java.math.BigDecimal;
 import java.util.List;
 
 import com.swappy.entities.HotelContactInfo;
@@ -31,6 +32,8 @@ public class HotelDto {
 	private HotelContactInfo contactInfo;
 
 	private Boolean isActive;
+
+	private BigDecimal startingPrice;
 
 	
 	
@@ -105,11 +108,18 @@ public class HotelDto {
 	public void setIsActive(Boolean isActive) {
 		this.isActive = isActive;
 	}
+
+	public BigDecimal getStartingPrice() {
+		return startingPrice;
+	}
+
+	public void setStartingPrice(BigDecimal startingPrice) {
+		this.startingPrice = startingPrice;
+	}
 	
 	
 	
 	
 }
-
 
 
