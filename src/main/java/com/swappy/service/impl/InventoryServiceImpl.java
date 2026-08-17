@@ -7,7 +7,6 @@ import java.time.temporal.ChronoUnit;
 import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -28,11 +27,13 @@ public class InventoryServiceImpl implements InventoryService {
 
     private static final Logger logger = LoggerFactory.getLogger(InventoryServiceImpl.class);
 
-    @Autowired
-    private InventoryRepository inventoryRepository;
+    private final InventoryRepository inventoryRepository;
+    private final ModelMapper modelMapper;
 
-    @Autowired
-    private ModelMapper modelMapper;
+    public InventoryServiceImpl(InventoryRepository inventoryRepository, ModelMapper modelMapper) {
+        this.inventoryRepository = inventoryRepository;
+        this.modelMapper = modelMapper;
+    }
 
     @Override
     public void initializeRoomForAYear(Room room) {
@@ -134,6 +135,16 @@ public class InventoryServiceImpl implements InventoryService {
 
         logger.info("Found {} hotels for search query", hotelPage.getTotalElements());
 
-        return hotelPage.map(ele -> modelMapper.map(ele, HotelDto.class));
+        return hotelPage.map(hotel -> {
+            HotelDto result = modelMapper.map(hotel, HotelDto.class);
+            result.setStartingPrice(inventoryRepository.findMinimumAvailablePrice(
+                    hotel.getId(),
+                    hotelSearchDto.getStartDate(),
+                    hotelSearchDto.getEndDate(),
+                    hotelSearchDto.getRoomCount(),
+                    dateCount
+            ));
+            return result;
+        });
     }
 }

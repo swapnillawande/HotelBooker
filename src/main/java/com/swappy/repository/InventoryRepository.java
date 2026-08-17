@@ -1,5 +1,6 @@
 package com.swappy.repository;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.*;
 
@@ -49,6 +50,32 @@ public interface InventoryRepository extends JpaRepository<Inventory, Long>{
 
 			
 			);
+
+	@Query("""
+			SELECT MIN(i.price)
+			FROM Inventory i
+			WHERE i.hotel.id = :hotelId
+			  AND i.date >= :startDate AND i.date < :endDate
+			  AND i.closed = false
+			  AND (i.totalCount - i.bookedCount - i.reservedCount) >= :roomsCount
+			  AND i.room.id IN (
+			      SELECT i2.room.id
+			      FROM Inventory i2
+			      WHERE i2.hotel.id = :hotelId
+			        AND i2.date >= :startDate AND i2.date < :endDate
+			        AND i2.closed = false
+			        AND (i2.totalCount - i2.bookedCount - i2.reservedCount) >= :roomsCount
+			      GROUP BY i2.room.id
+			      HAVING COUNT(i2.date) = :dateCount
+			  )
+			""")
+	BigDecimal findMinimumAvailablePrice(
+			@Param("hotelId") Long hotelId,
+			@Param("startDate") LocalDate startDate,
+			@Param("endDate") LocalDate endDate,
+			@Param("roomsCount") Integer roomsCount,
+			@Param("dateCount") Long dateCount
+	);
 	
 	
 	@Query("""
