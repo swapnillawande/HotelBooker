@@ -19,7 +19,9 @@ export async function apiRequest(path, options = {}) {
 
   const payload = response.status === 204 ? null : await response.json().catch(() => null)
   if (!response.ok) {
-    const message = payload?.error?.message || payload?.message || `Request failed (${response.status})`
+    const baseMessage = payload?.error?.message || payload?.message || `Request failed (${response.status})`
+    const validationDetails = payload?.error?.subErrors
+    const message = validationDetails?.length ? `${baseMessage}: ${validationDetails.join('; ')}` : baseMessage
     throw new ApiRequestError(message, response.status)
   }
 
