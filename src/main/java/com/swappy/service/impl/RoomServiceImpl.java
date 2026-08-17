@@ -59,6 +59,7 @@ public class RoomServiceImpl implements RoomService{
 	}
 
 	@Override
+	@Transactional
 	public List<RoomDto> getAllRoomsInHotel(Long hotelId) {
 		
 		logger.info("Getting all rooms in hotel with ID: "+hotelId);
@@ -74,6 +75,7 @@ public class RoomServiceImpl implements RoomService{
 	}
 
 	@Override
+	@Transactional
 	public RoomDto getRoomById(Long hotelId, Long roomId) {
 		
 		logger.info("Getting rooms with ID: "+ roomId);

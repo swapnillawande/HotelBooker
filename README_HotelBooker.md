@@ -106,6 +106,28 @@ Before running the project make sure the following software is installed:
 
 ---
 
+# Quick Demo (No MySQL Setup)
+
+Run the API with the `demo` profile to use an in-memory H2 database populated with
+sample Berlin and Hamburg properties, rooms, and one year of availability:
+
+```bash
+./mvnw spring-boot:run -Dspring-boot.run.profiles=demo
+```
+
+Then start the React client in another terminal:
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+Open [http://localhost:5173](http://localhost:5173). Demo data is recreated each
+time the API starts; the normal profile continues to use MySQL.
+
+---
+
 # Database Setup
 
 ## Step 1: Create Database
