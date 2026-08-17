@@ -172,6 +172,39 @@ class BookingServiceImplTests {
         verify(guestRepository, never()).save(any());
     }
 
+    @Test
+    void confirmsBookingAndConvertsReservedInventoryToBooked() {
+        Booking booking = reservedBooking();
+        booking.setBookingStatus(BookingStatus.GUEST_ADDED);
+        Inventory firstNight = inventory(new BigDecimal("40.00"));
+        firstNight.setReservedCount(3);
+        firstNight.setBookedCount(1);
+        when(bookingRepository.findByIdForUpdate(10L)).thenReturn(Optional.of(booking));
+        when(inventoryRepository.findAndLockInventoryForBooking(
+                room.getId(), booking.getCheckInDate(), booking.getCheckOutDate()))
+                .thenReturn(List.of(firstNight));
+        when(bookingRepository.save(booking)).thenReturn(booking);
+
+        BookingDto result = bookingService.confirmBooking(10L);
+
+        assertEquals(BookingStatus.CONFIRMED, result.getBookingStatus());
+        assertEquals(2, firstNight.getReservedCount());
+        assertEquals(2, firstNight.getBookedCount());
+        verify(inventoryRepository).saveAll(List.of(firstNight));
+    }
+
+    @Test
+    void confirmingAnAlreadyConfirmedBookingIsIdempotent() {
+        Booking booking = reservedBooking();
+        booking.setBookingStatus(BookingStatus.CONFIRMED);
+        when(bookingRepository.findByIdForUpdate(10L)).thenReturn(Optional.of(booking));
+
+        BookingDto result = bookingService.confirmBooking(10L);
+
+        assertEquals(BookingStatus.CONFIRMED, result.getBookingStatus());
+        verify(inventoryRepository, never()).findAndLockInventoryForBooking(any(), any(), any());
+    }
+
     private BookingRequest request(LocalDate checkIn, LocalDate checkOut, int roomsCount) {
         BookingRequest request = new BookingRequest();
         request.setHotelId(1L);

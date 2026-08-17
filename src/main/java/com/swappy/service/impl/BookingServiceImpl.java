@@ -164,6 +164,46 @@ public class BookingServiceImpl implements BookingService{
 	    return toDto(booking);
 	}
 
+	@Override
+	@Transactional
+	public BookingDto confirmBooking(Long bookingId) {
+		Booking booking = bookingRepository.findByIdForUpdate(bookingId)
+				.orElseThrow(() -> new ResourceNotFoundException("Booking not found with id: " + bookingId));
+
+		if (booking.getBookingStatus() == BookingStatus.CONFIRMED) {
+			return toDto(booking);
+		}
+		if (hasBookingExpired(booking)) {
+			throw new IllegalStateException("Booking has already expired");
+		}
+		if (booking.getBookingStatus() != BookingStatus.GUEST_ADDED) {
+			throw new IllegalStateException("Guest details must be added before confirmation");
+		}
+
+		List<Inventory> inventories = inventoryRepository.findAndLockInventoryForBooking(
+				booking.getRoom().getId(),
+				booking.getCheckInDate(),
+				booking.getCheckOutDate());
+		long expectedNights = ChronoUnit.DAYS.between(booking.getCheckInDate(), booking.getCheckOutDate());
+		if (inventories.size() != expectedNights) {
+			throw new IllegalStateException("Booking inventory is incomplete");
+		}
+
+		for (Inventory inventory : inventories) {
+			int reservedCount = inventory.getReservedCount() == null ? 0 : inventory.getReservedCount();
+			if (reservedCount < booking.getRoomsCount()) {
+				throw new IllegalStateException("Booking reservation is no longer available");
+			}
+			inventory.setReservedCount(reservedCount - booking.getRoomsCount());
+			int bookedCount = inventory.getBookedCount() == null ? 0 : inventory.getBookedCount();
+			inventory.setBookedCount(bookedCount + booking.getRoomsCount());
+		}
+		inventoryRepository.saveAll(inventories);
+
+		booking.setBookingStatus(BookingStatus.CONFIRMED);
+		return toDto(bookingRepository.save(booking));
+	}
+
 	public boolean hasBookingExpired(Booking booking) {
 	    return booking.getCreatedAt()
 	            .plusMinutes(10)
@@ -206,7 +246,6 @@ public class BookingServiceImpl implements BookingService{
 	}
 	
 }
-
 
 
 

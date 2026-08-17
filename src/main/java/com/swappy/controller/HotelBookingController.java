@@ -42,5 +42,10 @@ public class HotelBookingController {
 	        bookingService.addGuests(bookingId, guestDtoList)
 	    );
 	}
+
+	@PostMapping("/{bookingId}/confirm")
+	public ResponseEntity<BookingDto> confirmBooking(@PathVariable("bookingId") Long bookingId) {
+		return ResponseEntity.ok(bookingService.confirmBooking(bookingId));
+	}
 	
 }
