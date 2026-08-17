@@ -45,6 +45,7 @@ VITE_ENABLE_DEMO_FALLBACK=true npm run dev
 | `/search` | Availability results and filters |
 | `/hotels/:hotelId` | Property information and room selection |
 | `/booking` | Inventory hold and guest submission |
+| `/manage-booking` | Protected booking lookup and cancellation |
 | `/admin` | Hotel and room administration |
 
 ## Backend integration
@@ -57,6 +58,10 @@ The booking page intentionally separates the workflow into two stages:
 2. attach validated guests to the same booking.
 
 If guest submission fails, retrying does not create another inventory reservation. The backend expires abandoned reservations after ten minutes and returns their room counts to inventory.
+
+Confirmed bookings include a private access code. The booking number and access
+code are required together to retrieve or cancel a guest booking; cancellation
+is idempotent and returns the booked room count to inventory.
 
 ## Verification
 

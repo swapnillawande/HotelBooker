@@ -15,7 +15,7 @@ export default function Header() {
       </nav>
       <div className="header-actions">
         <button className="language-button" type="button" aria-label="Change language">EN · €</button>
-        <button className="outline-button" type="button">Sign in</button>
+        <Link className="outline-button" to="/manage-booking">Manage booking</Link>
       </div>
     </header>
   )
