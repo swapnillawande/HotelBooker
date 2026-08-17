@@ -1,6 +1,7 @@
 package com.swappy.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -34,6 +35,7 @@ import com.swappy.entities.Room;
 import com.swappy.entities.User;
 import com.swappy.entities.enums.BookingStatus;
 import com.swappy.entities.enums.Gender;
+import com.swappy.exception.ResourceNotFoundException;
 import com.swappy.repository.BookingRepository;
 import com.swappy.repository.GuestRepository;
 import com.swappy.repository.HotelRepository;
@@ -44,6 +46,8 @@ import com.swappy.service.impl.BookingServiceImpl;
 
 @ExtendWith(MockitoExtension.class)
 class BookingServiceImplTests {
+
+    private static final String MANAGEMENT_TOKEN = "c2f58627-3207-4ee9-8f69-74d08fa9fb27";
 
     @Mock private BookingRepository bookingRepository;
     @Mock private HotelRepository hotelRepository;
@@ -109,6 +113,7 @@ class BookingServiceImplTests {
         assertEquals(2, firstNight.getReservedCount());
         assertEquals(2, secondNight.getReservedCount());
         assertTrue(result.getGuests().isEmpty());
+        assertNotNull(result.getManagementToken());
         verify(inventoryRepository).saveAll(List.of(firstNight, secondNight));
     }
 
@@ -154,7 +159,7 @@ class BookingServiceImplTests {
         });
         when(bookingRepository.save(booking)).thenReturn(booking);
 
-        BookingDto result = bookingService.addGuests(10L, List.of(guestDto));
+        BookingDto result = bookingService.addGuests(10L, MANAGEMENT_TOKEN, List.of(guestDto));
 
         assertEquals(BookingStatus.GUEST_ADDED, result.getBookingStatus());
         assertEquals(1, result.getGuests().size());
@@ -167,7 +172,7 @@ class BookingServiceImplTests {
         when(bookingRepository.findById(10L)).thenReturn(Optional.of(booking));
         List<GuestDto> guests = List.of(new GuestDto(), new GuestDto(), new GuestDto());
 
-        assertThrows(IllegalArgumentException.class, () -> bookingService.addGuests(10L, guests));
+        assertThrows(IllegalArgumentException.class, () -> bookingService.addGuests(10L, MANAGEMENT_TOKEN, guests));
 
         verify(guestRepository, never()).save(any());
     }
@@ -185,7 +190,7 @@ class BookingServiceImplTests {
                 .thenReturn(List.of(firstNight));
         when(bookingRepository.save(booking)).thenReturn(booking);
 
-        BookingDto result = bookingService.confirmBooking(10L);
+        BookingDto result = bookingService.confirmBooking(10L, MANAGEMENT_TOKEN);
 
         assertEquals(BookingStatus.CONFIRMED, result.getBookingStatus());
         assertEquals(2, firstNight.getReservedCount());
@@ -199,10 +204,50 @@ class BookingServiceImplTests {
         booking.setBookingStatus(BookingStatus.CONFIRMED);
         when(bookingRepository.findByIdForUpdate(10L)).thenReturn(Optional.of(booking));
 
-        BookingDto result = bookingService.confirmBooking(10L);
+        BookingDto result = bookingService.confirmBooking(10L, MANAGEMENT_TOKEN);
 
         assertEquals(BookingStatus.CONFIRMED, result.getBookingStatus());
         verify(inventoryRepository, never()).findAndLockInventoryForBooking(any(), any(), any());
+    }
+
+    @Test
+    void cancelsConfirmedBookingAndReturnsBookedInventory() {
+        Booking booking = reservedBooking();
+        booking.setBookingStatus(BookingStatus.CONFIRMED);
+        Inventory inventory = inventory(new BigDecimal("40.00"));
+        inventory.setBookedCount(2);
+        when(bookingRepository.findByIdForUpdate(10L)).thenReturn(Optional.of(booking));
+        when(inventoryRepository.findAndLockInventoryForBooking(
+                room.getId(), booking.getCheckInDate(), booking.getCheckOutDate()))
+                .thenReturn(List.of(inventory));
+        when(bookingRepository.save(booking)).thenReturn(booking);
+
+        BookingDto result = bookingService.cancelBooking(10L, MANAGEMENT_TOKEN);
+
+        assertEquals(BookingStatus.CANCELLED, result.getBookingStatus());
+        assertEquals(1, inventory.getBookedCount());
+        verify(inventoryRepository).saveAll(List.of(inventory));
+    }
+
+    @Test
+    void cancellingAnAlreadyCancelledBookingIsIdempotent() {
+        Booking booking = reservedBooking();
+        booking.setBookingStatus(BookingStatus.CANCELLED);
+        when(bookingRepository.findByIdForUpdate(10L)).thenReturn(Optional.of(booking));
+
+        BookingDto result = bookingService.cancelBooking(10L, MANAGEMENT_TOKEN);
+
+        assertEquals(BookingStatus.CANCELLED, result.getBookingStatus());
+        verify(inventoryRepository, never()).findAndLockInventoryForBooking(any(), any(), any());
+    }
+
+    @Test
+    void rejectsBookingAccessWithTheWrongManagementToken() {
+        Booking booking = reservedBooking();
+        when(bookingRepository.findById(10L)).thenReturn(Optional.of(booking));
+
+        assertThrows(ResourceNotFoundException.class,
+                () -> bookingService.getBooking(10L, "wrong-token"));
     }
 
     private BookingRequest request(LocalDate checkIn, LocalDate checkOut, int roomsCount) {
@@ -229,6 +274,7 @@ class BookingServiceImplTests {
         booking.setRoom(room);
         booking.setUser(user);
         booking.setRoomsCount(1);
+        booking.setManagementToken(MANAGEMENT_TOKEN);
         booking.setCheckInDate(LocalDate.now().plusDays(2));
         booking.setCheckOutDate(LocalDate.now().plusDays(3));
         booking.setCreatedAt(LocalDateTime.now());

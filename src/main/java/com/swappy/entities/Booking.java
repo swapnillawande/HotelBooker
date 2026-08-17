@@ -50,6 +50,9 @@ public class Booking {
     
     @Column(nullable = false)
     private Integer roomsCount;
+
+    @Column(unique = true, updatable = false, length = 36)
+    private String managementToken;
     
     @Column(nullable = false)
     private LocalDate checkInDate;
@@ -124,6 +127,14 @@ public class Booking {
 
 	public Integer getRoomsCount() {
 		return roomsCount;
+	}
+
+	public String getManagementToken() {
+		return managementToken;
+	}
+
+	public void setManagementToken(String managementToken) {
+		this.managementToken = managementToken;
 	}
 
 
@@ -230,7 +241,6 @@ public class Booking {
     
     
 }
-
 
 
 

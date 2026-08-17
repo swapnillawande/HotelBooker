@@ -2,10 +2,12 @@ package com.swappy.service.impl;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 
 import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
@@ -109,6 +111,7 @@ public class BookingServiceImpl implements BookingService{
 		booking.setCheckOutDate(bookingRequest.getCheckOutDate());
 		booking.setUser(getCurrentUser());
 		booking.setRoomsCount(bookingRequest.getRoomsCount());
+		booking.setManagementToken(UUID.randomUUID().toString());
 		booking.setGuests(new HashSet<>());
 		BigDecimal amount = inventoryList.stream()
 				.map(Inventory::getPrice)
@@ -126,13 +129,14 @@ public class BookingServiceImpl implements BookingService{
 
 
 	@Transactional
-	public BookingDto addGuests(Long bookingId, List<GuestDto> guestDtoList) {
+	public BookingDto addGuests(Long bookingId, String managementToken, List<GuestDto> guestDtoList) {
 
 	    //log.info("Adding guests for booking with id: {}", bookingId);
 
 	    Booking booking = bookingRepository.findById(bookingId)
 	            .orElseThrow(() ->
 	                new ResourceNotFoundException("Booking not found with id: " + bookingId));
+	    validateManagementToken(booking, managementToken);
 
 	    if (hasBookingExpired(booking)) {
 	        throw new IllegalStateException("Booking has already expired");
@@ -166,9 +170,10 @@ public class BookingServiceImpl implements BookingService{
 
 	@Override
 	@Transactional
-	public BookingDto confirmBooking(Long bookingId) {
+	public BookingDto confirmBooking(Long bookingId, String managementToken) {
 		Booking booking = bookingRepository.findByIdForUpdate(bookingId)
 				.orElseThrow(() -> new ResourceNotFoundException("Booking not found with id: " + bookingId));
+		validateManagementToken(booking, managementToken);
 
 		if (booking.getBookingStatus() == BookingStatus.CONFIRMED) {
 			return toDto(booking);
@@ -204,6 +209,60 @@ public class BookingServiceImpl implements BookingService{
 		return toDto(bookingRepository.save(booking));
 	}
 
+	@Override
+	@Transactional
+	public BookingDto getBooking(Long bookingId, String managementToken) {
+		Booking booking = bookingRepository.findById(bookingId)
+				.orElseThrow(() -> new ResourceNotFoundException("Booking not found with id: " + bookingId));
+		validateManagementToken(booking, managementToken);
+		return toDto(booking);
+	}
+
+	@Override
+	@Transactional
+	public BookingDto cancelBooking(Long bookingId, String managementToken) {
+		Booking booking = bookingRepository.findByIdForUpdate(bookingId)
+				.orElseThrow(() -> new ResourceNotFoundException("Booking not found with id: " + bookingId));
+		validateManagementToken(booking, managementToken);
+
+		if (booking.getBookingStatus() == BookingStatus.CANCELLED) {
+			return toDto(booking);
+		}
+		if (booking.getBookingStatus() == BookingStatus.EXPIRED) {
+			throw new IllegalStateException("Expired bookings cannot be cancelled");
+		}
+		if (!booking.getCheckInDate().isAfter(LocalDate.now())) {
+			throw new IllegalStateException("Bookings cannot be cancelled on or after check-in");
+		}
+
+		List<Inventory> inventories = inventoryRepository.findAndLockInventoryForBooking(
+				booking.getRoom().getId(), booking.getCheckInDate(), booking.getCheckOutDate());
+		long expectedNights = ChronoUnit.DAYS.between(booking.getCheckInDate(), booking.getCheckOutDate());
+		if (inventories.size() != expectedNights) {
+			throw new IllegalStateException("Booking inventory is incomplete");
+		}
+
+		boolean confirmed = booking.getBookingStatus() == BookingStatus.CONFIRMED;
+		for (Inventory inventory : inventories) {
+			if (confirmed) {
+				int bookedCount = inventory.getBookedCount() == null ? 0 : inventory.getBookedCount();
+				if (bookedCount < booking.getRoomsCount()) {
+					throw new IllegalStateException("Booked inventory is inconsistent");
+				}
+				inventory.setBookedCount(bookedCount - booking.getRoomsCount());
+			} else {
+				int reservedCount = inventory.getReservedCount() == null ? 0 : inventory.getReservedCount();
+				if (reservedCount < booking.getRoomsCount()) {
+					throw new IllegalStateException("Reserved inventory is inconsistent");
+				}
+				inventory.setReservedCount(reservedCount - booking.getRoomsCount());
+			}
+		}
+		inventoryRepository.saveAll(inventories);
+		booking.setBookingStatus(BookingStatus.CANCELLED);
+		return toDto(bookingRepository.save(booking));
+	}
+
 	public boolean hasBookingExpired(Booking booking) {
 	    return booking.getCreatedAt()
 	            .plusMinutes(10)
@@ -227,12 +286,19 @@ public class BookingServiceImpl implements BookingService{
 		}
 	}
 
+	private void validateManagementToken(Booking booking, String managementToken) {
+		if (managementToken == null || !managementToken.equals(booking.getManagementToken())) {
+			throw new ResourceNotFoundException("Booking not found with id: " + booking.getId());
+		}
+	}
+
 	private BookingDto toDto(Booking booking) {
 		BookingDto dto = new BookingDto();
 		dto.setId(booking.getId());
 		dto.setHotelId(booking.getHotel().getId());
 		dto.setRoomId(booking.getRoom().getId());
 		dto.setRoomsCount(booking.getRoomsCount());
+		dto.setManagementToken(booking.getManagementToken());
 		dto.setCheckInDate(booking.getCheckInDate());
 		dto.setCheckOutDate(booking.getCheckOutDate());
 		dto.setCreatedAt(booking.getCreatedAt());
@@ -246,7 +312,6 @@ public class BookingServiceImpl implements BookingService{
 	}
 	
 }
-
 
 
 

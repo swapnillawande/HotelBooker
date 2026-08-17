@@ -11,9 +11,13 @@ public interface BookingService {
 	
 	public BookingDto initialiseBooking(BookingRequest bookingRequest);
 
-	public BookingDto addGuests(Long bookingId, List<GuestDto> guestDtoList);
+	public BookingDto addGuests(Long bookingId, String managementToken, List<GuestDto> guestDtoList);
 
-	public BookingDto confirmBooking(Long bookingId);
+	public BookingDto confirmBooking(Long bookingId, String managementToken);
+
+	public BookingDto getBooking(Long bookingId, String managementToken);
+
+	public BookingDto cancelBooking(Long bookingId, String managementToken);
 
 	
 	
