@@ -2,7 +2,6 @@ package com.swappy.controller;
 
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -16,15 +15,18 @@ import org.springframework.web.bind.annotation.RestController;
 import com.swappy.dto.RoomDto;
 import com.swappy.service.RoomService;
 
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+
 @RestController
 @RequestMapping("/admin/hotels/{hotelId}/rooms")
+@RequiredArgsConstructor
 public class RoomAdminController {
 	
-	@Autowired
-	private RoomService  roomService;
+	private final RoomService roomService;
 	
 	@PostMapping
-	public ResponseEntity<RoomDto> createRoomWithHotelId(@PathVariable("hotelId") Long hotelId, @RequestBody RoomDto roomDto){
+	public ResponseEntity<RoomDto> createRoomWithHotelId(@PathVariable("hotelId") Long hotelId, @Valid @RequestBody RoomDto roomDto){
 		
 		RoomDto room = roomService.createNewRoom(hotelId, roomDto);
 		
@@ -38,19 +40,19 @@ public class RoomAdminController {
 	
 	
 	@GetMapping("/{roomId}")
-	public ResponseEntity<RoomDto> getRoomById(@PathVariable("roomId") Long hotelId){
-		return ResponseEntity.ok(roomService.getRoomById(hotelId));
+	public ResponseEntity<RoomDto> getRoomById(@PathVariable("hotelId") Long hotelId,
+			@PathVariable("roomId") Long roomId){
+		return ResponseEntity.ok(roomService.getRoomById(hotelId, roomId));
 	}
 	
 	
 	@DeleteMapping("/{roomId}")
 	public ResponseEntity<Void> deleteRoomById(@PathVariable("hotelId") Long hotelId, @PathVariable("roomId") Long roomId ){
-		roomService.deleteRoomById(roomId);
+		roomService.deleteRoomById(hotelId, roomId);
 		return ResponseEntity.noContent().build();
 	}
 
 }
-
 
 
 

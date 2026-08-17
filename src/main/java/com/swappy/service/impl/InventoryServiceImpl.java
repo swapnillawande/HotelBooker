@@ -100,6 +100,9 @@ public class InventoryServiceImpl implements InventoryService {
 
     @Override
     public Page<HotelDto> searchHotels(HotelSearchDto hotelSearchDto) {
+		if (!hotelSearchDto.getEndDate().isAfter(hotelSearchDto.getStartDate())) {
+			throw new IllegalArgumentException("End date must be after start date");
+		}
 
         logger.info("Searching hotels in city={} from {} to {} for {} rooms",
                 hotelSearchDto.getCity(),
@@ -115,7 +118,7 @@ public class InventoryServiceImpl implements InventoryService {
         long dateCount = ChronoUnit.DAYS.between(
                 hotelSearchDto.getStartDate(),
                 hotelSearchDto.getEndDate()
-        ) + 1;
+        );
 
         Page<Hotel> hotelPage = inventoryRepository.findHotelsWithAvailableInventory(
                 hotelSearchDto.getCity(),

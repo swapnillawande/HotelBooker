@@ -3,6 +3,11 @@ package com.swappy.dto;
 import com.swappy.entities.User;
 import com.swappy.entities.enums.Gender;
 
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+
 
 public class GuestDto {
 
@@ -11,10 +16,15 @@ public class GuestDto {
 	
 	private User user;
 	
+	@NotBlank(message = "Guest name is required")
 	private String name;
 	
+	@NotNull(message = "Guest gender is required")
 	private Gender gender;
 	
+	@NotNull(message = "Guest age is required")
+	@Min(value = 1, message = "Guest age must be at least 1")
+	@Max(value = 120, message = "Guest age must be at most 120")
 	private Integer age;
 
 	public GuestDto() {

@@ -5,7 +5,6 @@ import java.util.List;
 import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.swappy.dto.RoomDto;
@@ -18,21 +17,19 @@ import com.swappy.service.InventoryService;
 import com.swappy.service.RoomService;
 
 import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
 
 @Service
+@RequiredArgsConstructor
 public class RoomServiceImpl implements RoomService{
 
-	@Autowired
-	private RoomRepository roomRepository;
+	private final RoomRepository roomRepository;
 	
-	@Autowired
-	private HotelRepository hotelRepository; 
+	private final HotelRepository hotelRepository;
 	
-	@Autowired
-	private InventoryService inventoryService;
+	private final InventoryService inventoryService;
 	
-	@Autowired
-	private ModelMapper modelMapper;
+	private final ModelMapper modelMapper;
 	
 	Logger logger = LoggerFactory.getLogger(HotelServiceImpl.class);
 	
@@ -77,13 +74,14 @@ public class RoomServiceImpl implements RoomService{
 	}
 
 	@Override
-	public RoomDto getRoomById(Long roomId) {
+	public RoomDto getRoomById(Long hotelId, Long roomId) {
 		
 		logger.info("Getting rooms with ID: "+ roomId);
 
 		
-		Room room = roomRepository.findById(roomId)
-					  .orElseThrow(() -> new ResourceNotFoundException("Room not found with id: " + roomId));
+		Room room = roomRepository.findByIdAndHotel_Id(roomId, hotelId)
+					  .orElseThrow(() -> new ResourceNotFoundException(
+							  "Room not found with id " + roomId + " in hotel " + hotelId));
 
 		
 		return modelMapper.map(room, RoomDto.class);
@@ -91,10 +89,11 @@ public class RoomServiceImpl implements RoomService{
 
 	@Override
 	@Transactional
-	public void deleteRoomById(Long roomId) {
+	public void deleteRoomById(Long hotelId, Long roomId) {
 		
-		Room room = roomRepository.findById(roomId)
-				  .orElseThrow(() -> new ResourceNotFoundException("Room not found with id: " + roomId));
+		Room room = roomRepository.findByIdAndHotel_Id(roomId, hotelId)
+				  .orElseThrow(() -> new ResourceNotFoundException(
+						  "Room not found with id " + roomId + " in hotel " + hotelId));
 		
 
 		inventoryService.deleteInventoriesByRoomId(roomId);

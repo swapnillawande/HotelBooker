@@ -2,7 +2,6 @@ package com.swappy.controller;
 
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -15,17 +14,21 @@ import com.swappy.dto.BookingRequest;
 import com.swappy.dto.GuestDto;
 import com.swappy.service.BookingService;
 
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotEmpty;
+import lombok.RequiredArgsConstructor;
+
 @RestController
 @RequestMapping("/bookings")
+@RequiredArgsConstructor
 public class HotelBookingController {
 
-	@Autowired
-	private BookingService bookingService;
+	private final BookingService bookingService;
 	
 	@PostMapping("/init")
-	public ResponseEntity<BookingDto> initaliseBooking(@RequestBody BookingRequest bookingRequest){
+	public ResponseEntity<BookingDto> initialiseBooking(@Valid @RequestBody BookingRequest bookingRequest){
 		
-		return ResponseEntity.ok(bookingService.initaliseBooking(bookingRequest));
+		return ResponseEntity.ok(bookingService.initialiseBooking(bookingRequest));
 		
 	}
 	
@@ -33,7 +36,7 @@ public class HotelBookingController {
 	@PostMapping("/{bookingId}/addGuests")
 	public ResponseEntity<BookingDto> addGuests(
 	        @PathVariable("bookingId") Long bookingId,
-	        @RequestBody List<GuestDto> guestDtoList) {
+	        @Valid @NotEmpty(message = "At least one guest is required") @RequestBody List<GuestDto> guestDtoList) {
 
 	    return ResponseEntity.ok(
 	        bookingService.addGuests(bookingId, guestDtoList)

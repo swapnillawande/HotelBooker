@@ -5,6 +5,7 @@ import java.util.List;
 
 import com.swappy.entities.HotelContactInfo;
 
+import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
@@ -17,8 +18,10 @@ public class HotelDto {
 
 	private Long id;
 
+	@NotBlank(message = "Hotel name is required")
 	private String name;
 	
+	@NotBlank(message = "Hotel city is required")
 	private String city;
 	
 	private List<String> amenities;
@@ -107,7 +110,6 @@ public class HotelDto {
 	
 	
 }
-
 
 
 

@@ -2,22 +2,35 @@ package com.swappy.dto;
 
 import java.time.LocalDate;
 
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 import lombok.Data;
 
 @Data // lombok dependency is not working so adding getters and setters manually
 public class HotelSearchDto {
 
 	
+	@NotBlank(message = "City is required")
 	private String city;
 	
+	@NotNull(message = "Start date is required")
 	private LocalDate startDate;
 	
+	@NotNull(message = "End date is required")
 	private LocalDate endDate;
 	
+	@NotNull(message = "Room count is required")
+	@Positive(message = "Room count must be at least one")
 	private Integer roomsCount;
 	
+	@Min(value = 0, message = "Page cannot be negative")
 	private Integer page = 0;
 	
+	@Min(value = 1, message = "Page size must be at least one")
+	@Max(value = 100, message = "Page size cannot exceed 100")
 	private Integer size = 10;
 
 	public HotelSearchDto() {
