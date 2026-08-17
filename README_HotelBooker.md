@@ -1,6 +1,8 @@
 
 # HotelBooker API
 
+> The repository now includes the Stayly React client in [`frontend/`](frontend/README.md). Run the Spring Boot API and Vite client side by side for the complete booking experience.
+
 ## Overview
 
 HotelBooker is a Spring Boot based hotel booking backend application that allows administrators to manage hotels and rooms while enabling customers to browse hotels and create bookings.
@@ -492,4 +494,3 @@ Possible enhancements:
 # Author
 
 Developed using Spring Boot and MySQL.
-
