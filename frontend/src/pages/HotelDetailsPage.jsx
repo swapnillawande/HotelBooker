@@ -39,6 +39,8 @@ export default function HotelDetailsPage() {
         <div className="room-list">{rooms.map((room, index) => {
           const paramsWithRoom = new URLSearchParams(bookingParams)
           paramsWithRoom.set('roomId', room.id)
+          const requiredRooms = Math.ceil(Number(bookingParams.get('guests')) / room.capacity)
+          paramsWithRoom.set('rooms', String(Math.max(Number(bookingParams.get('rooms')), requiredRooms)))
           return <article className="room-card" key={room.id}>
             <div className={`room-visual room-visual-${index % 3}`}><span>{room.capacity} guests</span></div>
             <div className="room-copy"><span className="eyebrow">{room.totalCount} rooms available</span><h3>{room.type}</h3><div className="amenity-list">{room.amenities?.map((item) => <span key={item}>✓ {item}</span>)}</div><p>Comfortable, practical and ready for your city adventure.</p></div>

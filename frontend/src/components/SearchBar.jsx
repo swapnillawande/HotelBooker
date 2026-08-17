@@ -17,6 +17,10 @@ export default function SearchBar({ compact = false, initial = {} }) {
   const update = (event) => setForm({ ...form, [event.target.name]: event.target.value })
   const submit = (event) => {
     event.preventDefault()
+    if (form.checkOut <= form.checkIn) {
+      setForm({ ...form, checkOut: new Date(new Date(form.checkIn).getTime() + 86400000).toISOString().slice(0, 10) })
+      return
+    }
     navigate(`/search?${new URLSearchParams(form).toString()}`)
   }
 
