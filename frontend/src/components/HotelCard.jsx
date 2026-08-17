@@ -16,7 +16,7 @@ export default function HotelCard({ hotel, horizontal = false }) {
         </div>
         {hotel.description && <p>{hotel.description}</p>}
         <div className="amenity-list">{hotel.amenities?.map((amenity) => <span key={amenity}>✓ {amenity}</span>)}</div>
-        <div className="price-row"><span>From <strong>€{hotel.price ?? hotel.basePrice ?? 19}</strong> / night</span><Link className="text-button" to={`/hotels/${hotel.id}${location.search}`}>View rooms →</Link></div>
+        <div className="price-row"><span>From <strong>€{hotel.startingPrice ?? hotel.price ?? hotel.basePrice ?? '—'}</strong> / night</span><Link className="text-button" to={`/hotels/${hotel.id}${location.search}`}>View rooms →</Link></div>
       </div>
     </article>
   )
