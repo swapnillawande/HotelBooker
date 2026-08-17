@@ -4,11 +4,15 @@ The frontend is a React and Vite client for the HotelBooker Spring Boot API.
 
 ## Run locally
 
-Start the backend from the repository root:
+For a zero-setup local demo, start the backend from the repository root with the
+seeded H2 profile:
 
 ```bash
-JAVA_HOME=/path/to/java-17-or-newer ./mvnw spring-boot:run
+./mvnw spring-boot:run -Dspring-boot.run.profiles=demo
 ```
+
+This creates sample Berlin and Hamburg properties with rooms and availability.
+Use the default profile instead when connecting to the configured MySQL database.
 
 Then start the frontend:
 
