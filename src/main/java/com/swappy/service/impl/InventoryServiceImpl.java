@@ -206,8 +206,8 @@ public class InventoryServiceImpl implements InventoryService {
         return new RoomOfferDto(
                 room.getId(),
                 room.getType(),
-                room.getAmenities(),
-                room.getPhotos(),
+                room.getAmenities() == null ? List.of() : List.copyOf(room.getAmenities()),
+                room.getPhotos() == null ? List.of() : List.copyOf(room.getPhotos()),
                 room.getCapacity(),
                 availableRooms,
                 nights,

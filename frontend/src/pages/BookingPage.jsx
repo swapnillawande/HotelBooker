@@ -18,6 +18,8 @@ export default function BookingPage() {
   const [params] = useSearchParams()
   const hotel = demoHotels.find((item) => String(item.id) === params.get('hotelId')) || demoHotels[0]
   const room = hotel.rooms.find((item) => String(item.id) === params.get('roomId')) || hotel.rooms[0]
+  const hotelName = params.get('hotelName') || hotel.name
+  const roomType = params.get('roomType') || room.type
   const guestCount = Number(params.get('guests') || 2)
   const [guests, setGuests] = useState(Array.from({ length: guestCount }, (_, index) => ({ name: '', age: '', gender: 'OTHER', key: index })))
   const [payment, setPayment] = useState({ cardholderName: user?.name || '', cardNumber: '4242 4242 4242 4242', expiry: '12/30', cvc: '123' })
@@ -26,7 +28,8 @@ export default function BookingPage() {
   const [message, setMessage] = useState('')
   const [booking, setBooking] = useState(null)
   const nights = useMemo(() => Math.max(1, Math.ceil((new Date(params.get('checkOut')) - new Date(params.get('checkIn'))) / 86400000)), [params])
-  const total = Number(room.basePrice) * nights * Number(params.get('rooms') || 1)
+  const quotedTotal = Number(params.get('totalPrice'))
+  const total = Number.isFinite(quotedTotal) && quotedTotal > 0 ? quotedTotal : Number(room.basePrice) * nights * Number(params.get('rooms') || 1)
   const paymentStep = booking?.bookingStatus === 'GUEST_ADDED'
 
   const updateGuest = (index, field, value) => setGuests((current) => current.map((guest, guestIndex) => guestIndex === index ? { ...guest, [field]: value } : guest))
@@ -105,7 +108,7 @@ export default function BookingPage() {
           <button className="primary-button confirm-button" disabled={status === 'loading'}>{status === 'loading' ? (paymentStep ? 'Processing payment…' : booking ? 'Saving guests…' : 'Holding your room…') : paymentStep ? `Pay €${booking.amount}` : booking ? 'Continue to payment' : `Reserve & continue · €${total}`}</button>
         </form>
 
-        <aside className="booking-summary"><img src={hotel.image} alt="" /><span className="eyebrow">Your selection</span><h2>{hotel.name}</h2><p>{room.type}</p><dl><div><dt>Check in</dt><dd>{params.get('checkIn')}</dd></div><div><dt>Check out</dt><dd>{params.get('checkOut')}</dd></div><div><dt>Stay</dt><dd>{nights} night{nights > 1 ? 's' : ''}</dd></div><div><dt>Guests</dt><dd>{guestCount}</dd></div></dl><div className="summary-total"><span>Total</span><strong>€{booking?.amount ?? total}</strong></div>{paymentStep && <small className="summary-payment-note">Payment due now · Demo Visa ending 4242</small>}</aside>
+        <aside className="booking-summary"><img src={hotel.image} alt="" /><span className="eyebrow">Your selection</span><h2>{hotelName}</h2><p>{roomType}</p><dl><div><dt>Check in</dt><dd>{params.get('checkIn')}</dd></div><div><dt>Check out</dt><dd>{params.get('checkOut')}</dd></div><div><dt>Stay</dt><dd>{nights} night{nights > 1 ? 's' : ''}</dd></div><div><dt>Guests</dt><dd>{guestCount}</dd></div><div><dt>Rooms</dt><dd>{params.get('rooms') || 1}</dd></div></dl><div className="summary-total"><span>Total</span><strong>€{booking?.amount ?? total}</strong></div>{paymentStep && <small className="summary-payment-note">Payment due now · Demo Visa ending 4242</small>}</aside>
       </div>
     </main>
   )

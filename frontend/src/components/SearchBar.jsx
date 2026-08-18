@@ -40,8 +40,10 @@ export default function SearchBar({ compact = false, initial = {} }) {
       </label>
       <label className="search-field guest-field">
         <span>Guests & rooms</span>
-        <div className="field-control"><i aria-hidden="true">○</i><select name="guests" value={form.guests} onChange={update} aria-label="Guests">
+        <div className="field-control guest-room-control"><i aria-hidden="true">○</i><select name="guests" value={form.guests} onChange={update} aria-label="Guests">
           {[1, 2, 3, 4, 5, 6].map((value) => <option key={value} value={value}>{value} guest{value > 1 ? 's' : ''}</option>)}
+        </select><select name="rooms" value={form.rooms} onChange={update} aria-label="Rooms">
+          {[1, 2, 3, 4].map((value) => <option key={value} value={value}>{value} room{value > 1 ? 's' : ''}</option>)}
         </select></div>
       </label>
       <button className="primary-button search-button" type="submit">Find a stay <span>→</span></button>
