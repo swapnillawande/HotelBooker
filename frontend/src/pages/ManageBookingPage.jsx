@@ -74,6 +74,7 @@ export default function ManageBookingPage() {
             <div><dt>Total</dt><dd>€{booking.amount}</dd></div>
           </dl>
           <div className="managed-guests"><strong>Guests</strong><span>{booking.guests?.map((guest) => guest.name).join(', ') || 'Not added yet'}</span></div>
+          {booking.paymentStatus && <div className="managed-payment"><strong>Payment</strong><span>{booking.paymentStatus.replace('_', ' ')}{booking.paymentReference ? ` · Ref ${booking.paymentReference}` : ''}</span></div>}
           {canCancel ? <button className="danger-button" disabled={status === 'cancelling'} onClick={cancel}>{status === 'cancelling' ? 'Cancelling…' : 'Cancel booking'}</button> : <p className="cancellation-note">This booking can no longer be cancelled online.</p>}
         </article>}
       </section>

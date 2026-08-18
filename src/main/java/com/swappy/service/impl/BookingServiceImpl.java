@@ -14,23 +14,28 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.beans.factory.annotation.Value;
 
 import com.swappy.dto.BookingDto;
 import com.swappy.dto.BookingRequest;
 import com.swappy.dto.GuestDto;
+import com.swappy.dto.DemoPaymentRequest;
 import com.swappy.entities.Booking;
 import com.swappy.entities.Guest;
 import com.swappy.entities.Hotel;
 import com.swappy.entities.Inventory;
+import com.swappy.entities.Payment;
 import com.swappy.entities.Room;
 import com.swappy.entities.User;
 import com.swappy.entities.enums.BookingStatus;
+import com.swappy.entities.enums.PaymentStatus;
 import com.swappy.entities.enums.Role;
 import com.swappy.exception.ResourceNotFoundException;
 import com.swappy.repository.BookingRepository;
 import com.swappy.repository.GuestRepository;
 import com.swappy.repository.HotelRepository;
 import com.swappy.repository.InventoryRepository;
+import com.swappy.repository.PaymentRepository;
 import com.swappy.repository.RoomRepository;
 import com.swappy.repository.UserRepository;
 import com.swappy.service.BookingService;
@@ -43,6 +48,8 @@ import lombok.RequiredArgsConstructor;
 public class BookingServiceImpl implements BookingService{
 
 	private static final String GUEST_EMAIL = "guest@stayly.local";
+	private static final String DEMO_PAYMENT_TOKEN = "tok_demo_visa";
+	private static final String DEMO_PAYMENT_PROVIDER = "STAYLY_DEMO";
 
 	private final BookingRepository bookingRepository;
 	
@@ -56,7 +63,12 @@ public class BookingServiceImpl implements BookingService{
 	
 	private final UserRepository userRepository;
 
+	private final PaymentRepository paymentRepository;
+
 	private final ModelMapper modelMapper;
+
+	@Value("${payments.demo-enabled:false}")
+	private boolean demoPaymentsEnabled;
 	
 	Logger logger = LoggerFactory.getLogger(BookingServiceImpl.class);
 
@@ -178,11 +190,80 @@ public class BookingServiceImpl implements BookingService{
 		if (booking.getBookingStatus() == BookingStatus.CONFIRMED) {
 			return toDto(booking);
 		}
+		Payment payment = paymentRepository.findByBooking_Id(bookingId)
+				.filter(candidate -> candidate.getPaymentStatus() == PaymentStatus.CONFIRMED)
+				.orElseThrow(() -> new IllegalStateException("Successful payment is required before confirmation"));
+		booking.setPayment(payment);
+		booking.setBookingStatus(BookingStatus.PAYMENT_PENDING);
+		return confirmPaidBooking(booking);
+	}
+
+	@Override
+	@Transactional
+	public BookingDto payBooking(
+			Long bookingId,
+			String managementToken,
+			String idempotencyKey,
+			DemoPaymentRequest request) {
+		Booking booking = bookingRepository.findByIdForUpdate(bookingId)
+				.orElseThrow(() -> new ResourceNotFoundException("Booking not found with id: " + bookingId));
+		validateManagementToken(booking, managementToken);
+
+		if (booking.getBookingStatus() == BookingStatus.CONFIRMED) {
+			return toDto(booking);
+		}
 		if (hasBookingExpired(booking)) {
 			throw new IllegalStateException("Booking has already expired");
 		}
 		if (booking.getBookingStatus() != BookingStatus.GUEST_ADDED) {
-			throw new IllegalStateException("Guest details must be added before confirmation");
+			throw new IllegalStateException("Guest details must be added before payment");
+		}
+		validateIdempotencyKey(idempotencyKey);
+		if (!demoPaymentsEnabled) {
+			throw new IllegalStateException("Demo payments are disabled in this environment");
+		}
+		if (!DEMO_PAYMENT_TOKEN.equals(request.paymentToken())) {
+			throw new IllegalArgumentException("Payment was declined by the demo provider");
+		}
+
+		Payment payment = paymentRepository.findByBooking_Id(bookingId).orElse(null);
+		if (payment != null) {
+			if (!payment.getIdempotencyKey().equals(idempotencyKey)) {
+				throw new IllegalStateException("A different payment attempt already exists for this booking");
+			}
+			booking.setPayment(payment);
+			if (payment.getPaymentStatus() == PaymentStatus.CONFIRMED) {
+				booking.setBookingStatus(BookingStatus.PAYMENT_PENDING);
+				return confirmPaidBooking(booking);
+			}
+		} else {
+			payment = new Payment();
+			payment.setTransactionId(UUID.randomUUID().toString());
+			payment.setIdempotencyKey(idempotencyKey);
+			payment.setProvider(DEMO_PAYMENT_PROVIDER);
+			payment.setCardLastFour("4242");
+			payment.setPaymentStatus(PaymentStatus.PENDING);
+			payment.setAmount(booking.getAmount());
+			payment.setBooking(booking);
+			payment = paymentRepository.save(payment);
+		}
+
+		booking.setPayment(payment);
+		booking.setBookingStatus(BookingStatus.PAYMENT_PENDING);
+		bookingRepository.save(booking);
+
+		payment.setPaymentStatus(PaymentStatus.CONFIRMED);
+		paymentRepository.save(payment);
+		return confirmPaidBooking(booking);
+	}
+
+	private BookingDto confirmPaidBooking(Booking booking) {
+		if (booking.getPayment() == null
+				|| booking.getPayment().getPaymentStatus() != PaymentStatus.CONFIRMED) {
+			throw new IllegalStateException("Successful payment is required before confirmation");
+		}
+		if (booking.getBookingStatus() != BookingStatus.PAYMENT_PENDING) {
+			throw new IllegalStateException("Booking is not awaiting payment confirmation");
 		}
 
 		List<Inventory> inventories = inventoryRepository.findAndLockInventoryForBooking(
@@ -281,6 +362,11 @@ public class BookingServiceImpl implements BookingService{
 			}
 		}
 		inventoryRepository.saveAll(inventories);
+		Payment payment = booking.getPayment();
+		if (payment != null && payment.getPaymentStatus() == PaymentStatus.CONFIRMED) {
+			payment.setPaymentStatus(PaymentStatus.REFUNDED);
+			paymentRepository.save(payment);
+		}
 		booking.setBookingStatus(BookingStatus.CANCELLED);
 		return toDto(bookingRepository.save(booking));
 	}
@@ -318,6 +404,15 @@ public class BookingServiceImpl implements BookingService{
 		}
 	}
 
+	private void validateIdempotencyKey(String idempotencyKey) {
+		if (idempotencyKey == null
+				|| idempotencyKey.isBlank()
+				|| idempotencyKey.length() < 8
+				|| idempotencyKey.length() > 64) {
+			throw new IllegalArgumentException("Idempotency-Key must contain between 8 and 64 characters");
+		}
+	}
+
 	private BookingDto toDto(Booking booking) {
 		BookingDto dto = new BookingDto();
 		dto.setId(booking.getId());
@@ -331,6 +426,11 @@ public class BookingServiceImpl implements BookingService{
 		dto.setUpdatedAt(booking.getUpdatedAt());
 		dto.setBookingStatus(booking.getBookingStatus());
 		dto.setAmount(booking.getAmount());
+		Payment payment = booking.getPayment();
+		if (payment != null) {
+			dto.setPaymentStatus(payment.getPaymentStatus());
+			dto.setPaymentReference(payment.getTransactionId());
+		}
 		dto.setGuests(booking.getGuests() == null ? Set.of() : booking.getGuests().stream()
 				.map(guest -> modelMapper.map(guest, GuestDto.class))
 				.collect(java.util.stream.Collectors.toSet()));
@@ -347,4 +447,3 @@ public class BookingServiceImpl implements BookingService{
 	}
 
 }
-

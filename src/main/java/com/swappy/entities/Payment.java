@@ -31,8 +31,17 @@ public class Payment {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 	
-	@Column(nullable = false, unique = true)
+	@Column(nullable = false, unique = true, length = 36)
 	private String transactionId;
+
+	@Column(nullable = false, unique = true, length = 64)
+	private String idempotencyKey;
+
+	@Column(nullable = false, length = 20)
+	private String provider;
+
+	@Column(length = 4)
+	private String cardLastFour;
 	
 	@Enumerated(EnumType.STRING)
 	@Column(nullable = false)
@@ -47,12 +56,12 @@ public class Payment {
 	@UpdateTimestamp
 	private LocalDateTime updatedAt;
 	
-	@OneToOne(fetch = FetchType.LAZY)
+	@OneToOne(fetch = FetchType.LAZY, optional = false)
+	@JoinColumn(name = "booking_id", nullable = false, unique = true)
 	private Booking booking;
 	
 	
 }
-
 
 
 

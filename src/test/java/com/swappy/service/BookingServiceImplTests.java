@@ -23,23 +23,28 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.modelmapper.ModelMapper;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import com.swappy.dto.BookingDto;
 import com.swappy.dto.BookingRequest;
 import com.swappy.dto.GuestDto;
+import com.swappy.dto.DemoPaymentRequest;
 import com.swappy.entities.Booking;
 import com.swappy.entities.Guest;
 import com.swappy.entities.Hotel;
 import com.swappy.entities.Inventory;
+import com.swappy.entities.Payment;
 import com.swappy.entities.Room;
 import com.swappy.entities.User;
 import com.swappy.entities.enums.BookingStatus;
 import com.swappy.entities.enums.Gender;
+import com.swappy.entities.enums.PaymentStatus;
 import com.swappy.exception.ResourceNotFoundException;
 import com.swappy.repository.BookingRepository;
 import com.swappy.repository.GuestRepository;
 import com.swappy.repository.HotelRepository;
 import com.swappy.repository.InventoryRepository;
+import com.swappy.repository.PaymentRepository;
 import com.swappy.repository.RoomRepository;
 import com.swappy.repository.UserRepository;
 import com.swappy.service.impl.BookingServiceImpl;
@@ -55,6 +60,7 @@ class BookingServiceImplTests {
     @Mock private GuestRepository guestRepository;
     @Mock private InventoryRepository inventoryRepository;
     @Mock private UserRepository userRepository;
+    @Mock private PaymentRepository paymentRepository;
 
     private BookingServiceImpl bookingService;
     private Hotel hotel;
@@ -70,7 +76,9 @@ class BookingServiceImplTests {
                 guestRepository,
                 inventoryRepository,
                 userRepository,
+                paymentRepository,
                 new ModelMapper());
+        ReflectionTestUtils.setField(bookingService, "demoPaymentsEnabled", true);
 
         hotel = new Hotel();
         hotel.setId(1L);
@@ -176,24 +184,47 @@ class BookingServiceImplTests {
     }
 
     @Test
-    void confirmsBookingAndConvertsReservedInventoryToBooked() {
+    void paysForBookingAndConvertsReservedInventoryToBooked() {
         Booking booking = reservedBooking();
         booking.setBookingStatus(BookingStatus.GUEST_ADDED);
         Inventory firstNight = inventory(new BigDecimal("40.00"));
         firstNight.setReservedCount(3);
         firstNight.setBookedCount(1);
         when(bookingRepository.findByIdForUpdate(10L)).thenReturn(Optional.of(booking));
+        when(paymentRepository.findByBooking_Id(10L)).thenReturn(Optional.empty());
+        when(paymentRepository.save(any(Payment.class))).thenAnswer(invocation -> invocation.getArgument(0));
         when(inventoryRepository.findAndLockInventoryForBooking(
                 room.getId(), booking.getCheckInDate(), booking.getCheckOutDate()))
                 .thenReturn(List.of(firstNight));
         when(bookingRepository.save(booking)).thenReturn(booking);
 
-        BookingDto result = bookingService.confirmBooking(10L, MANAGEMENT_TOKEN);
+        BookingDto result = bookingService.payBooking(
+                10L,
+                MANAGEMENT_TOKEN,
+                "checkout-attempt-123",
+                new DemoPaymentRequest("tok_demo_visa", "Alex Doe"));
 
         assertEquals(BookingStatus.CONFIRMED, result.getBookingStatus());
+        assertEquals(PaymentStatus.CONFIRMED, result.getPaymentStatus());
+        assertNotNull(result.getPaymentReference());
         assertEquals(2, firstNight.getReservedCount());
         assertEquals(2, firstNight.getBookedCount());
         verify(inventoryRepository).saveAll(List.of(firstNight));
+    }
+
+    @Test
+    void rejectsConfirmationWithoutSuccessfulPayment() {
+        Booking booking = reservedBooking();
+        booking.setBookingStatus(BookingStatus.GUEST_ADDED);
+        when(bookingRepository.findByIdForUpdate(10L)).thenReturn(Optional.of(booking));
+        when(paymentRepository.findByBooking_Id(10L)).thenReturn(Optional.empty());
+
+        IllegalStateException error = assertThrows(
+                IllegalStateException.class,
+                () -> bookingService.confirmBooking(10L, MANAGEMENT_TOKEN));
+
+        assertEquals("Successful payment is required before confirmation", error.getMessage());
+        verify(inventoryRepository, never()).findAndLockInventoryForBooking(any(), any(), any());
     }
 
     @Test
@@ -212,6 +243,9 @@ class BookingServiceImplTests {
     void cancelsConfirmedBookingAndReturnsBookedInventory() {
         Booking booking = reservedBooking();
         booking.setBookingStatus(BookingStatus.CONFIRMED);
+        Payment payment = new Payment();
+        payment.setPaymentStatus(PaymentStatus.CONFIRMED);
+        booking.setPayment(payment);
         Inventory inventory = inventory(new BigDecimal("40.00"));
         inventory.setBookedCount(2);
         when(bookingRepository.findByIdForUpdate(10L)).thenReturn(Optional.of(booking));
@@ -223,8 +257,10 @@ class BookingServiceImplTests {
         BookingDto result = bookingService.cancelBooking(10L, MANAGEMENT_TOKEN);
 
         assertEquals(BookingStatus.CANCELLED, result.getBookingStatus());
+        assertEquals(PaymentStatus.REFUNDED, result.getPaymentStatus());
         assertEquals(1, inventory.getBookedCount());
         verify(inventoryRepository).saveAll(List.of(inventory));
+        verify(paymentRepository).save(payment);
     }
 
     @Test

@@ -6,6 +6,7 @@ import java.time.LocalDateTime;
 import java.util.Set;
 
 import com.swappy.entities.enums.BookingStatus;
+import com.swappy.entities.enums.PaymentStatus;
 
 public class BookingDto {
 
@@ -20,6 +21,8 @@ public class BookingDto {
     private LocalDateTime updatedAt;
     private BookingStatus bookingStatus;
     private BigDecimal amount;
+    private PaymentStatus paymentStatus;
+    private String paymentReference;
     private Set<GuestDto> guests;
 
     public Long getId() { return id; }
@@ -44,6 +47,10 @@ public class BookingDto {
     public void setBookingStatus(BookingStatus bookingStatus) { this.bookingStatus = bookingStatus; }
     public BigDecimal getAmount() { return amount; }
     public void setAmount(BigDecimal amount) { this.amount = amount; }
+    public PaymentStatus getPaymentStatus() { return paymentStatus; }
+    public void setPaymentStatus(PaymentStatus paymentStatus) { this.paymentStatus = paymentStatus; }
+    public String getPaymentReference() { return paymentReference; }
+    public void setPaymentReference(String paymentReference) { this.paymentReference = paymentReference; }
     public Set<GuestDto> getGuests() { return guests; }
     public void setGuests(Set<GuestDto> guests) { this.guests = guests; }
 }
