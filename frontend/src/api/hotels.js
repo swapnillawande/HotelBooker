@@ -37,6 +37,15 @@ export async function getHotelInfo(hotelId) {
   return apiRequest(`/hotels/${hotelId}/info`)
 }
 
+export async function getRoomOffers(hotelId, criteria) {
+  const query = new URLSearchParams({
+    checkIn: criteria.checkIn,
+    checkOut: criteria.checkOut,
+    rooms: String(criteria.rooms || 1),
+  })
+  return apiRequest(`/hotels/${hotelId}/offers?${query}`)
+}
+
 export async function createHotel(hotel) {
   return apiRequest('/admin/hotels', { method: 'POST', body: JSON.stringify(hotel) })
 }
