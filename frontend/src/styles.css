@@ -1,6 +1,6 @@
 @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap');
 
-:root { --ink:#173a34; --forest:#214f46; --mint:#dceade; --cream:#f5f1e8; --coral:#f3775b; --sun:#f5c85b; --white:#fff; --muted:#687874; --line:#d9e0dc; font-family:'DM Sans',sans-serif; color:var(--ink); background:#fbfaf7; font-synthesis:none; }
+:root { --ink:#173a34; --forest:#214f46; --navy:#173a34; --mint:#dceade; --cream:#f5f1e8; --coral:#f3775b; --sun:#f5c85b; --white:#fff; --muted:#687874; --line:#d9e0dc; font-family:'DM Sans',sans-serif; color:var(--ink); background:#fbfaf7; font-synthesis:none; }
 * { box-sizing:border-box; }
 html { scroll-behavior:smooth; }
 body { margin:0; min-width:320px; }
@@ -16,6 +16,12 @@ h1,h2,h3,.brand { font-family:'Manrope',sans-serif; }
 .main-nav { display:flex; gap:30px; font-size:14px; font-weight:600; }
 .main-nav a:hover { color:var(--coral); }
 .header-actions { margin-left:auto; display:flex; align-items:center; gap:10px; }
+.account-button { border-radius:999px; padding:11px 17px; background:var(--forest); color:white; font-weight:800; font-size:13px; }
+.account-menu { display:flex; align-items:center; gap:9px; padding-left:4px; }
+.account-link { display:flex; align-items:center; gap:8px; font-weight:800; font-size:13px; }
+.account-avatar { display:grid; place-items:center; width:35px; height:35px; border-radius:50%; background:var(--sun); }
+.account-menu button { border:0; background:transparent; color:var(--muted); font-size:12px; padding:6px; }
+.account-menu button:hover { color:var(--coral); }
 .language-button { border:0; background:transparent; color:var(--ink); font-weight:600; padding:10px; }
 .outline-button,.light-button { border:1px solid var(--ink); border-radius:999px; padding:10px 18px; background:transparent; color:var(--ink); font-weight:700; }
 .outline-button:hover { background:var(--ink); color:white; }
@@ -222,6 +228,54 @@ footer small { text-align:right; }
 .managed-guests { display:grid; gap:6px; }
 .managed-guests span,.cancellation-note { color:var(--muted); }
 .managed-booking-card .danger-button { justify-self:start; }
+.account-page { min-height:calc(100vh - 78px); display:grid; grid-template-columns:1.05fr .95fr; background:var(--cream); }
+.account-promo { background:var(--forest); color:white; padding:clamp(60px,9vw,125px); display:flex; flex-direction:column; justify-content:center; position:relative; overflow:hidden; }
+.account-promo::after { content:''; width:280px; height:280px; position:absolute; right:-120px; bottom:-100px; border:55px solid rgba(245,200,91,.22); border-radius:50%; }
+.account-promo h1 { margin:24px 0; font-size:clamp(54px,6vw,86px); line-height:.95; letter-spacing:-5px; }
+.account-promo>p { color:#d3e0dc; max-width:540px; font-size:17px; line-height:1.7; }
+.account-benefits { display:grid; gap:13px; margin-top:25px; color:#e5eee9; font-size:14px; font-weight:700; }
+.account-panel { width:min(540px,calc(100% - 44px)); margin:auto; padding:55px 0; }
+.account-tabs { display:grid; grid-template-columns:1fr 1fr; padding:5px; border-radius:13px; background:#e9e5dc; margin-bottom:18px; }
+.account-tabs button { border:0; border-radius:9px; padding:12px; color:var(--muted); background:transparent; font-weight:800; }
+.account-tabs button.active { color:var(--ink); background:white; box-shadow:0 4px 15px rgba(23,58,52,.08); }
+.account-form { background:white; padding:36px; border-radius:21px; display:grid; gap:17px; box-shadow:0 16px 45px rgba(23,58,52,.08); }
+.account-form h2 { margin:0 0 8px; font-size:34px; letter-spacing:-1.8px; }
+.account-form label { display:grid; gap:7px; color:#4f6661; font-size:12px; font-weight:800; }
+.account-form input,.booking-lookup input { width:100%; border:1px solid var(--line); background:#fbfaf7; border-radius:10px; padding:13px; color:var(--ink); outline:0; }
+.account-form input:focus,.booking-lookup input:focus { border-color:var(--forest); box-shadow:0 0 0 3px rgba(33,79,70,.1); }
+.account-submit { min-height:51px; margin-top:3px; }
+.account-submit:disabled { opacity:.65; }
+.demo-login { margin:15px 0; border:1px dashed #c7cfc9; border-radius:13px; padding:14px 17px; display:flex; flex-wrap:wrap; gap:4px 15px; color:var(--muted); font-size:12px; }
+.demo-login strong { width:100%; color:var(--ink); }
+.guest-access-link { text-align:center; color:var(--muted); font-size:13px; }
+.guest-access-link a { color:var(--coral); font-weight:800; }
+.account-loading { margin:auto; padding:50px; color:var(--muted); }
+.signed-in-booking,.booking-account-note { background:var(--mint); border-radius:11px; color:#315f54; padding:13px 15px; font-size:13px; }
+.booking-account-note { text-align:left; margin:25px auto 0; max-width:560px; }
+.booking-account-note p { margin:5px 0 0; color:#527069; }
+.trips-page { min-height:calc(100vh - 78px); background:#f3f1eb; padding-bottom:100px; }
+.trips-header { min-height:285px; padding:65px max(24px,calc((100vw - 1080px)/2)) 100px; background:var(--forest); color:white; display:flex; align-items:center; justify-content:space-between; gap:35px; }
+.trips-header h1 { margin:8px 0; font-size:clamp(48px,6vw,72px); letter-spacing:-4px; }
+.trips-header p { color:#c8d9d4; margin:0; }
+.trips-header .primary-button { display:inline-flex; padding:14px 21px; }
+.trips-shell { max-width:1080px; margin:-45px auto 0; padding:0 20px; position:relative; }
+.trip-list { display:grid; gap:19px; }
+.trip-card { background:white; border-radius:20px; box-shadow:0 12px 35px rgba(23,58,52,.09); overflow:hidden; display:grid; grid-template-columns:265px 1fr; }
+.trip-image { min-height:275px; padding:17px; background:linear-gradient(135deg,var(--mint),#9bc8bd); background-size:cover; background-position:center; }
+.trip-image span { display:inline-block; background:white; border-radius:999px; padding:7px 11px; font-size:11px; font-weight:800; }
+.trip-content { padding:27px; }
+.trip-heading { display:flex; justify-content:space-between; align-items:start; gap:18px; }
+.trip-heading h2 { margin:5px 0 0; font-size:27px; }
+.trip-content dl { display:grid; grid-template-columns:repeat(4,1fr); border-block:1px solid var(--line); margin:21px 0 17px; }
+.trip-content dl div { padding:14px 8px 14px 0; }
+.trip-content dt { color:var(--muted); font-size:11px; }
+.trip-content dd { margin:5px 0 0; font-weight:800; }
+.trip-guests { color:var(--muted); font-size:13px; }
+.trip-content .danger-button { margin-top:5px; }
+.trips-empty { min-height:290px; background:white; border-radius:20px; box-shadow:0 12px 35px rgba(23,58,52,.09); display:grid; place-items:center; align-content:center; gap:8px; text-align:center; padding:40px; color:var(--muted); }
+.trips-empty>span { font-size:35px; }
+.trips-empty h2 { color:var(--ink); margin:4px 0 0; }
+.trips-empty p { max-width:440px; }
 @keyframes shimmer { to { background-position:-150% 0; } }
 @media (max-width:900px) {
   .main-nav { display:none; }
@@ -239,10 +293,15 @@ footer small { text-align:right; }
   .room-price { grid-column:1 / -1; border-left:0; border-top:1px solid var(--line); flex-direction:row; justify-content:flex-end; gap:15px; align-items:center; }
   .booking-layout,.admin-columns { grid-template-columns:1fr; }
   .booking-lookup { grid-template-columns:1fr; }
+  .account-page { grid-template-columns:1fr; }
+  .account-promo { padding:70px 9%; }
+  .trip-card { grid-template-columns:210px 1fr; }
 }
 @media (max-width:620px) {
   .site-header { height:68px; padding:0 18px; }
   .header-actions .language-button { display:none; }
+  .header-actions>.outline-button { display:none; }
+  .account-link>span:last-child,.account-menu button { display:none; }
   .hero { min-height:870px; padding:46px 22px 350px; }
   .hero h1 { font-size:54px; letter-spacing:-3.2px; }
   .hero-art { width:110%; right:-20%; bottom:325px; }
@@ -288,4 +347,14 @@ footer small { text-align:right; }
   .manage-booking-intro h1 { font-size:37px; }
   .manage-booking-shell { padding-inline:14px; }
   .managed-booking-card dl { grid-template-columns:1fr 1fr; }
+  .account-promo { padding:55px 24px; }
+  .account-promo h1 { font-size:52px; letter-spacing:-3px; }
+  .account-panel { width:calc(100% - 28px); padding:35px 0 60px; }
+  .account-form { padding:26px 21px; }
+  .trips-header { padding:48px 20px 85px; align-items:flex-start; flex-direction:column; }
+  .trips-header h1 { font-size:45px; letter-spacing:-2.7px; }
+  .trips-shell { padding-inline:14px; }
+  .trip-card { grid-template-columns:1fr; }
+  .trip-image { min-height:190px; }
+  .trip-content dl { grid-template-columns:1fr 1fr; }
 }

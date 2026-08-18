@@ -1,3 +1,5 @@
+import { getAccessToken } from '../auth/session'
+
 const API_BASE = '/api/v1'
 
 export class ApiRequestError extends Error {
@@ -9,10 +11,12 @@ export class ApiRequestError extends Error {
 }
 
 export async function apiRequest(path, options = {}) {
+  const accessToken = getAccessToken()
   const response = await fetch(`${API_BASE}${path}`, {
     ...options,
     headers: {
       ...(options.body ? { 'Content-Type': 'application/json' } : {}),
+      ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
       ...options.headers,
     },
   })
