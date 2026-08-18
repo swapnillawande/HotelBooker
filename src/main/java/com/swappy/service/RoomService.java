@@ -6,13 +6,13 @@ import com.swappy.dto.RoomDto;
 
 public interface RoomService {
 
-	public RoomDto createNewRoom(Long hotelId, RoomDto roomDto);
+	public RoomDto createNewRoom(Long hotelId, RoomDto roomDto, Long ownerId);
 	
-	public List<RoomDto> getAllRoomsInHotel(Long hotelId);
+	public List<RoomDto> getAllRoomsInHotel(Long hotelId, Long ownerId);
 	
-	public RoomDto getRoomById(Long hotelId, Long roomId);
+	public RoomDto getRoomById(Long hotelId, Long roomId, Long ownerId);
 	
-	public void deleteRoomById(Long hotelId, Long roomId);
+	public void deleteRoomById(Long hotelId, Long roomId, Long ownerId);
 	
 	
 }

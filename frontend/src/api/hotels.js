@@ -50,6 +50,10 @@ export async function createHotel(hotel) {
   return apiRequest('/admin/hotels', { method: 'POST', body: JSON.stringify(hotel) })
 }
 
+export async function getAdminHotels() {
+  return apiRequest('/admin/hotels')
+}
+
 export async function getAdminHotel(hotelId) {
   return apiRequest(`/admin/hotels/${hotelId}`)
 }

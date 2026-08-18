@@ -202,10 +202,29 @@ footer small { text-align:right; }
 .success-card p { color:var(--muted); margin-bottom:35px; }
 .success-card .primary-button { padding:14px 22px; }
 .admin-page { min-height:100vh; background:#eef3ef; }
-.admin-header { background:var(--forest); color:white; padding:70px max(24px,calc((100vw - 1188px)/2)) 100px; }
+.admin-header { background:var(--forest); color:white; padding:70px max(24px,calc((100vw - 1188px)/2)) 100px; display:flex; justify-content:space-between; align-items:end; gap:45px; }
 .admin-header h1 { font-size:clamp(48px,6vw,76px); letter-spacing:-4px; line-height:1; margin:20px 0; }
 .admin-header p { color:#c8d9d4; }
+.admin-metrics { display:flex; gap:10px; flex-wrap:wrap; justify-content:flex-end; }
+.admin-metrics span { min-width:112px; padding:14px 16px; border:1px solid rgba(255,255,255,.18); border-radius:14px; display:grid; color:#c8d9d4; font-size:11px; }
+.admin-metrics strong { color:white; font:800 28px 'Manrope'; }
 .admin-shell { max-width:1188px; margin:-45px auto 0; padding:0 24px 100px; position:relative; }
+.property-toolbar { min-height:90px; padding:17px 20px; display:flex; align-items:center; justify-content:space-between; gap:18px; background:white; border-radius:18px 18px 0 0; }
+.property-toolbar h2 { margin:4px 0 0; }
+.property-toolbar .primary-button { padding:13px 18px; }
+.property-list { padding:0 20px 20px; display:grid; grid-template-columns:repeat(3,1fr); gap:10px; background:white; border-radius:0 0 18px 18px; box-shadow:0 12px 35px rgba(23,58,52,.12); }
+.property-card { min-width:0; border:1px solid var(--line); border-radius:13px; padding:13px; display:grid; grid-template-columns:auto 1fr auto; align-items:center; gap:11px; background:#fbfaf7; color:var(--ink); text-align:left; }
+.property-card:hover,.property-card.selected { border-color:var(--forest); background:#eef4f0; }
+.property-card.selected { box-shadow:inset 0 0 0 1px var(--forest); }
+.property-card>span:nth-child(2) { min-width:0; display:grid; gap:3px; }
+.property-card strong,.property-card small { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.property-card small { color:var(--muted); }
+.property-card i { color:var(--coral); font-style:normal; }
+.property-icon { width:38px; height:38px; border-radius:11px; display:grid; place-items:center; background:#f4e7bf; color:#715713; font-weight:800; }
+.property-icon.active { background:var(--mint); color:var(--forest); }
+.property-empty,.property-loading { padding:25px; color:var(--muted); background:white; }
+.property-empty { grid-column:1 / -1; border:1px dashed var(--line); border-radius:12px; text-align:center; }
+.property-loading { border-radius:0 0 18px 18px; }
 .admin-toolbar { background:white; border-radius:16px; padding:15px; display:flex; gap:12px; align-items:end; box-shadow:0 12px 35px rgba(23,58,52,.12); }
 .admin-toolbar label { flex:1; }
 .admin-toolbar input { min-width:160px; }
@@ -315,6 +334,9 @@ footer small { text-align:right; }
   .room-card { grid-template-columns:180px 1fr; }
   .room-price { grid-column:1 / -1; border-left:0; border-top:1px solid var(--line); flex-direction:row; justify-content:flex-end; gap:15px; align-items:center; }
   .booking-layout,.admin-columns { grid-template-columns:1fr; }
+  .admin-header { align-items:start; flex-direction:column; }
+  .admin-metrics { justify-content:flex-start; }
+  .property-list { grid-template-columns:1fr 1fr; }
   .booking-lookup { grid-template-columns:1fr; }
   .account-page { grid-template-columns:1fr; }
   .account-promo { padding:70px 9%; }
@@ -369,6 +391,7 @@ footer small { text-align:right; }
   .admin-toolbar { flex-wrap:wrap; }
   .admin-toolbar label { flex-basis:100%; }
   .admin-shell { padding-inline:14px; }
+  .property-list { grid-template-columns:1fr; }
   .manage-booking-intro h1 { font-size:37px; }
   .manage-booking-shell { padding-inline:14px; }
   .managed-booking-card dl { grid-template-columns:1fr 1fr; }
