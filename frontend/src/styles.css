@@ -39,6 +39,7 @@ h1,h2,h3,.brand { font-family:'Manrope',sans-serif; }
 .field-control { display:flex; align-items:center; gap:9px; }
 .field-control i { font-style:normal; color:var(--coral); font-weight:800; }
 .field-control input,.field-control select { color:var(--ink); width:100%; border:0; outline:0; background:transparent; min-width:0; font-weight:600; }
+.guest-room-control select+select { border-left:1px solid var(--line); padding-left:8px; }
 .primary-button { background:var(--coral); color:white; border:0; font-weight:800; border-radius:12px; padding:0 24px; white-space:nowrap; }
 .primary-button:hover { background:#e76348; transform:translateY(-1px); }
 .search-button span { font-size:20px; margin-left:8px; }
@@ -109,6 +110,7 @@ footer small { text-align:right; }
 .filters legend { font-weight:800; padding-top:20px; margin-bottom:12px; }
 .filters fieldset label { display:block; color:var(--muted); margin:11px 0; font-weight:500; }
 .filters input[type=checkbox] { accent-color:var(--forest); }
+.filter-reset { border:0; padding:0; background:transparent; color:var(--coral); font-size:12px; font-weight:800; }
 .results-heading { display:flex; justify-content:space-between; align-items:end; margin-bottom:28px; }
 .results-heading h1 { font-size:43px; letter-spacing:-2px; margin:6px 0; }
 .results-heading p { color:var(--muted); margin:0; }
@@ -147,7 +149,14 @@ footer small { text-align:right; }
 .room-price { border-left:1px solid var(--line); padding:28px 20px; display:flex; flex-direction:column; align-items:flex-end; justify-content:center; }
 .room-price small { color:var(--muted); }
 .room-price strong { font:800 36px 'Manrope'; margin:4px 0 18px; }
+.room-price .stay-total-label { margin-top:-18px; margin-bottom:16px; }
 .room-price .primary-button { padding:13px 18px; border-radius:10px; }
+.room-skeleton { height:210px; border-radius:18px; background:linear-gradient(100deg,#e7e8e4 30%,#f3f3f0 50%,#e7e8e4 70%); background-size:300% 100%; animation:shimmer 1.4s infinite; }
+.availability-message { min-height:230px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:10px; padding:35px; border:1px dashed var(--line); border-radius:18px; background:white; text-align:center; }
+.availability-message strong { font:800 26px 'Manrope'; }
+.availability-message span { color:var(--muted); }
+.availability-message .outline-button { margin-top:8px; }
+.availability-message.error { border-color:#efb7aa; background:#fff8f6; }
 .booking-page { min-height:calc(100vh - 78px); background:var(--cream); padding:65px 24px 100px; }
 .checkout-steps { max-width:1050px; margin:0 auto 22px; display:grid; grid-template-columns:repeat(3,1fr); gap:8px; }
 .checkout-steps span { padding:10px 14px; border-bottom:3px solid #d6d7d1; color:#84908c; font-size:12px; font-weight:800; }

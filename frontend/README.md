@@ -59,6 +59,10 @@ The shared client in `src/api/client.js` unwraps the API response envelope and c
 It also attaches the active bearer token automatically. Account sessions live in
 browser session storage and are validated with `/auth/me` whenever the app starts.
 
+Search filters and sorting run against the live result set. Property pages load
+date-specific offers from `/hotels/{hotelId}/offers`, including the lowest room
+count available across the stay and the exact total for all requested nights and rooms.
+
 The booking page intentionally separates the workflow into three stages:
 
 1. initialize the booking and reserve inventory;
