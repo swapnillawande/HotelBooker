@@ -14,6 +14,9 @@ seeded H2 profile:
 This creates sample Berlin and Hamburg properties with rooms and availability.
 Use the default profile instead when connecting to the configured MySQL database.
 
+Use `demo@stayly.local` / `StaylyDemo123!` for the guest journey or
+`manager@stayly.local` / `StaylyDemo123!` for the protected property workspace.
+
 Then start the frontend:
 
 ```bash
@@ -46,11 +49,15 @@ VITE_ENABLE_DEMO_FALLBACK=true npm run dev
 | `/hotels/:hotelId` | Property information and room selection |
 | `/booking` | Inventory hold and guest submission |
 | `/manage-booking` | Protected booking lookup and cancellation |
-| `/admin` | Hotel and room administration |
+| `/account` | Sign in and account registration |
+| `/my-bookings` | Authenticated booking history and cancellation |
+| `/admin` | Manager-only hotel and room administration |
 
 ## Backend integration
 
 The shared client in `src/api/client.js` unwraps the API response envelope and converts error responses into `ApiRequestError`. Validation details returned by the backend are shown in the UI.
+It also attaches the active bearer token automatically. Account sessions live in
+browser session storage and are validated with `/auth/me` whenever the app starts.
 
 The booking page intentionally separates the workflow into two stages:
 
