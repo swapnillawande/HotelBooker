@@ -51,6 +51,7 @@ The project follows a layered architecture using:
 ### Hotel Browsing
 - Search hotels
 - View hotel details and information
+- View date-specific room availability and exact stay pricing
 
 ### Booking Features
 - Initialize booking

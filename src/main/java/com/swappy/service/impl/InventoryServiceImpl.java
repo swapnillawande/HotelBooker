@@ -3,6 +3,10 @@ package com.swappy.service.impl;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
+import java.math.RoundingMode;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
@@ -14,9 +18,12 @@ import org.springframework.stereotype.Service;
 
 import com.swappy.dto.HotelDto;
 import com.swappy.dto.HotelSearchDto;
+import com.swappy.dto.RoomOfferDto;
 import com.swappy.entities.Hotel;
 import com.swappy.entities.Inventory;
 import com.swappy.entities.Room;
+import com.swappy.exception.ResourceNotFoundException;
+import com.swappy.repository.HotelRepository;
 import com.swappy.repository.InventoryRepository;
 import com.swappy.service.InventoryService;
 
@@ -28,10 +35,15 @@ public class InventoryServiceImpl implements InventoryService {
     private static final Logger logger = LoggerFactory.getLogger(InventoryServiceImpl.class);
 
     private final InventoryRepository inventoryRepository;
+    private final HotelRepository hotelRepository;
     private final ModelMapper modelMapper;
 
-    public InventoryServiceImpl(InventoryRepository inventoryRepository, ModelMapper modelMapper) {
+    public InventoryServiceImpl(
+            InventoryRepository inventoryRepository,
+            HotelRepository hotelRepository,
+            ModelMapper modelMapper) {
         this.inventoryRepository = inventoryRepository;
+        this.hotelRepository = hotelRepository;
         this.modelMapper = modelMapper;
     }
 
@@ -146,5 +158,75 @@ public class InventoryServiceImpl implements InventoryService {
             ));
             return result;
         });
+    }
+
+    @Override
+    @Transactional
+    public List<RoomOfferDto> getRoomOffers(
+            Long hotelId,
+            LocalDate startDate,
+            LocalDate endDate,
+            Integer roomsCount) {
+        validateOfferRequest(startDate, endDate, roomsCount);
+        Hotel hotel = hotelRepository.findById(hotelId)
+                .orElseThrow(() -> new ResourceNotFoundException("Hotel not found with id: " + hotelId));
+        if (!Boolean.TRUE.equals(hotel.getIsActive())) {
+            throw new IllegalStateException("Hotel is not active for booking");
+        }
+
+        int nights = Math.toIntExact(ChronoUnit.DAYS.between(startDate, endDate));
+        Map<Long, List<Inventory>> inventoryByRoom = inventoryRepository.findAvailableRoomInventory(
+                        hotelId, startDate, endDate, roomsCount).stream()
+                .collect(java.util.stream.Collectors.groupingBy(
+                        inventory -> inventory.getRoom().getId(),
+                        LinkedHashMap::new,
+                        java.util.stream.Collectors.toList()));
+
+        return inventoryByRoom.values().stream()
+                .filter(inventories -> inventories.size() == nights)
+                .map(inventories -> toRoomOffer(inventories, nights, roomsCount))
+                .toList();
+    }
+
+    private RoomOfferDto toRoomOffer(List<Inventory> inventories, int nights, int roomsCount) {
+        Room room = inventories.get(0).getRoom();
+        int availableRooms = inventories.stream()
+                .mapToInt(inventory -> inventory.getTotalCount()
+                        - inventory.getBookedCount()
+                        - inventory.getReservedCount())
+                .min()
+                .orElse(0);
+        BigDecimal singleRoomTotal = inventories.stream()
+                .map(Inventory::getPrice)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        BigDecimal totalPrice = singleRoomTotal.multiply(BigDecimal.valueOf(roomsCount));
+        BigDecimal nightlyPrice = singleRoomTotal
+                .divide(BigDecimal.valueOf(nights), 2, RoundingMode.HALF_UP);
+
+        return new RoomOfferDto(
+                room.getId(),
+                room.getType(),
+                room.getAmenities(),
+                room.getPhotos(),
+                room.getCapacity(),
+                availableRooms,
+                nights,
+                nightlyPrice,
+                totalPrice);
+    }
+
+    private void validateOfferRequest(LocalDate startDate, LocalDate endDate, Integer roomsCount) {
+        if (startDate == null || endDate == null) {
+            throw new IllegalArgumentException("Check-in and check-out dates are required");
+        }
+        if (startDate.isBefore(LocalDate.now())) {
+            throw new IllegalArgumentException("Check-in date cannot be in the past");
+        }
+        if (!endDate.isAfter(startDate)) {
+            throw new IllegalArgumentException("Check-out date must be after check-in date");
+        }
+        if (roomsCount == null || roomsCount < 1 || roomsCount > 20) {
+            throw new IllegalArgumentException("Room count must be between 1 and 20");
+        }
     }
 }
