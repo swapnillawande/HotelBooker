@@ -99,7 +99,6 @@ class BookingServiceImplTests {
         when(roomRepository.findById(2L)).thenReturn(Optional.of(room));
         when(inventoryRepository.findAndLockAvailableInventory(2L, checkIn, checkOut, 2))
                 .thenReturn(List.of(firstNight, secondNight));
-        when(userRepository.findByEmail("guest@stayly.local")).thenReturn(Optional.of(user));
         when(bookingRepository.save(any(Booking.class))).thenAnswer(invocation -> {
             Booking booking = invocation.getArgument(0);
             booking.setId(10L);
@@ -151,7 +150,6 @@ class BookingServiceImplTests {
         guestDto.setAge(28);
         guestDto.setGender(Gender.OTHER);
         when(bookingRepository.findById(10L)).thenReturn(Optional.of(booking));
-        when(userRepository.findByEmail("guest@stayly.local")).thenReturn(Optional.of(user));
         when(guestRepository.save(any(Guest.class))).thenAnswer(invocation -> {
             Guest guest = invocation.getArgument(0);
             guest.setId(11L);

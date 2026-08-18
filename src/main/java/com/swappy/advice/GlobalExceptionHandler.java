@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import com.swappy.exception.ResourceNotFoundException;
+import com.swappy.exception.InvalidCredentialsException;
 
 import jakarta.validation.ConstraintViolationException;
 
@@ -46,6 +47,11 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ApiResponse<?>> handleResourceNotFound(ResourceNotFoundException exception) {
 
         return errorResponse(HttpStatus.NOT_FOUND, exception.getMessage(), null);
+    }
+
+    @ExceptionHandler(InvalidCredentialsException.class)
+    public ResponseEntity<ApiResponse<?>> handleInvalidCredentials(InvalidCredentialsException exception) {
+        return errorResponse(HttpStatus.UNAUTHORIZED, exception.getMessage(), null);
     }
 
     @ExceptionHandler(Exception.class)

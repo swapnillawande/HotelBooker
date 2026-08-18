@@ -20,4 +20,6 @@ public interface BookingRepository extends JpaRepository<Booking, Long>{
 	@Query("SELECT b FROM Booking b WHERE b.id = :id")
 	Optional<Booking> findByIdForUpdate(@Param("id") Long id);
 
+	List<Booking> findByUser_IdOrderByCreatedAtDesc(Long userId);
+
 }
