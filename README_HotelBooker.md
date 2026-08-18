@@ -33,10 +33,12 @@ The project follows a layered architecture using:
 
 ### Hotel Management
 - Create hotel
+- List manager-owned properties
 - Update hotel
 - Activate hotel
 - Delete hotel
 - Get hotel by ID
+- Enforce property ownership across hotel and room administration
 
 ### Room Management
 - Create rooms for a hotel

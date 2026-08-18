@@ -34,13 +34,11 @@ public class RoomServiceImpl implements RoomService{
 	Logger logger = LoggerFactory.getLogger(HotelServiceImpl.class);
 	
 	@Override
-	public RoomDto createNewRoom(Long hotelId, RoomDto roomDto) {
+	public RoomDto createNewRoom(Long hotelId, RoomDto roomDto, Long ownerId) {
 		
 		logger.info("Creating room..");
 		
-		Hotel hotel=  hotelRepository
-				.findById(hotelId)
-				.orElseThrow(() -> new ResourceNotFoundException("Hotel not found with id: " + hotelId));
+		Hotel hotel = findOwnedHotel(hotelId, ownerId);
 		
 		Room room = modelMapper.map(roomDto, Room.class);
 		
@@ -60,13 +58,11 @@ public class RoomServiceImpl implements RoomService{
 
 	@Override
 	@Transactional
-	public List<RoomDto> getAllRoomsInHotel(Long hotelId) {
+	public List<RoomDto> getAllRoomsInHotel(Long hotelId, Long ownerId) {
 		
 		logger.info("Getting all rooms in hotel with ID: "+hotelId);
 		
-		Hotel hotel=  hotelRepository
-				.findById(hotelId)
-				.orElseThrow(() -> new ResourceNotFoundException("Hotel not found with id: " + hotelId));
+		Hotel hotel = findOwnedHotel(hotelId, ownerId);
 		
 	    return hotel.getRooms()
 	            .stream()
@@ -76,11 +72,12 @@ public class RoomServiceImpl implements RoomService{
 
 	@Override
 	@Transactional
-	public RoomDto getRoomById(Long hotelId, Long roomId) {
+	public RoomDto getRoomById(Long hotelId, Long roomId, Long ownerId) {
 		
 		logger.info("Getting rooms with ID: "+ roomId);
 
 		
+		findOwnedHotel(hotelId, ownerId);
 		Room room = roomRepository.findByIdAndHotel_Id(roomId, hotelId)
 					  .orElseThrow(() -> new ResourceNotFoundException(
 							  "Room not found with id " + roomId + " in hotel " + hotelId));
@@ -91,8 +88,9 @@ public class RoomServiceImpl implements RoomService{
 
 	@Override
 	@Transactional
-	public void deleteRoomById(Long hotelId, Long roomId) {
+	public void deleteRoomById(Long hotelId, Long roomId, Long ownerId) {
 		
+		findOwnedHotel(hotelId, ownerId);
 		Room room = roomRepository.findByIdAndHotel_Id(roomId, hotelId)
 				  .orElseThrow(() -> new ResourceNotFoundException(
 						  "Room not found with id " + roomId + " in hotel " + hotelId));
@@ -106,6 +104,11 @@ public class RoomServiceImpl implements RoomService{
 
 		logger.info("Room deleted with ID: "+ roomId);
 
+	}
+
+	private Hotel findOwnedHotel(Long hotelId, Long ownerId) {
+		return hotelRepository.findByIdAndOwner_Id(hotelId, ownerId)
+				.orElseThrow(() -> new ResourceNotFoundException("Hotel not found with id: " + hotelId));
 	}
 
 }

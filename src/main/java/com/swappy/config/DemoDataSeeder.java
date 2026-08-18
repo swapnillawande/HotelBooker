@@ -40,14 +40,14 @@ public class DemoDataSeeder implements ApplicationRunner {
     @Transactional
     public void run(ApplicationArguments args) {
         seedUser("demo@stayly.local", "Stayly Guest", Role.GUEST);
-        seedUser("manager@stayly.local", "Stayly Manager", Role.HOTEL_MANAGER);
+        User manager = seedUser("manager@stayly.local", "Stayly Manager", Role.HOTEL_MANAGER);
 
         if (hotelRepository.count() > 0) {
             logger.info("Demo data already exists; skipping seed");
             return;
         }
 
-        seedHotel(
+        seedHotel(manager,
                 "Stayly Berlin Mitte",
                 "Berlin",
                 List.of("Free Wi-Fi", "24-hour reception", "Guest kitchen", "Bar"),
@@ -59,7 +59,7 @@ public class DemoDataSeeder implements ApplicationRunner {
                         room("Shared dorm bed", "22.00", 6, 24,
                                 List.of("Secure locker", "Reading light", "Shared lounge"))));
 
-        seedHotel(
+        seedHotel(manager,
                 "Stayly Hamburg Harbour",
                 "Hamburg",
                 List.of("Free Wi-Fi", "Breakfast", "Games room", "Family spaces"),
@@ -72,25 +72,27 @@ public class DemoDataSeeder implements ApplicationRunner {
         logger.info("Demo profile ready with {} hotels", hotelRepository.count());
     }
 
-    private void seedUser(String email, String name, Role role) {
-        if (userRepository.findByEmailIgnoreCase(email).isPresent()) {
-            return;
+    private User seedUser(String email, String name, Role role) {
+        var existing = userRepository.findByEmailIgnoreCase(email);
+        if (existing.isPresent()) {
+            return existing.get();
         }
         User user = new User();
         user.setEmail(email);
         user.setName(name);
         user.setPassword(passwordEncoder.encode("StaylyDemo123!"));
         user.setRoles(java.util.Set.of(role));
-        userRepository.save(user);
+        return userRepository.save(user);
     }
 
-    private void seedHotel(String name, String city, List<String> amenities, List<Room> rooms) {
+    private void seedHotel(User owner, String name, String city, List<String> amenities, List<Room> rooms) {
         Hotel hotel = new Hotel();
         hotel.setName(name);
         hotel.setCity(city);
         hotel.setAmenities(amenities);
         hotel.setPhotos(List.of());
         hotel.setIsActive(false);
+        hotel.setOwner(owner);
         hotel = hotelRepository.save(hotel);
 
         for (Room room : rooms) {

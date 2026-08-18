@@ -14,6 +14,7 @@ import com.swappy.entities.Hotel;
 import com.swappy.entities.Room;
 import com.swappy.exception.ResourceNotFoundException;
 import com.swappy.repository.HotelRepository;
+import com.swappy.repository.UserRepository;
 import com.swappy.service.HotelService;
 import com.swappy.service.InventoryService;
 
@@ -27,6 +28,8 @@ import lombok.extern.slf4j.Slf4j;
 public class HotelServiceImpl implements HotelService{
 
 	private final HotelRepository hotelRepository;
+
+	private final UserRepository userRepository;
 	
 	private final InventoryService inventoryService;
 	
@@ -35,7 +38,7 @@ public class HotelServiceImpl implements HotelService{
 	Logger logger = LoggerFactory.getLogger(HotelServiceImpl.class);
 
 	
-	public HotelDto createNewHotel(HotelDto hotelDto) {
+	public HotelDto createNewHotel(HotelDto hotelDto, Long ownerId) {
 
 
 		logger.info("Creating hotel with name: "+ hotelDto.getName());
@@ -43,6 +46,8 @@ public class HotelServiceImpl implements HotelService{
 		Hotel hotel = modelMapper.map(hotelDto, Hotel.class);
 		
 		hotel.setIsActive(false);
+		hotel.setOwner(userRepository.findById(ownerId)
+				.orElseThrow(() -> new ResourceNotFoundException("Manager account not found")));
 		
 		hotel=  hotelRepository.save(hotel);
 		
@@ -56,28 +61,36 @@ public class HotelServiceImpl implements HotelService{
 
 	@Override
 	@Transactional
-	public HotelDto getHotelById(Long id) {
+	public List<HotelDto> getHotelsForOwner(Long ownerId) {
+		return hotelRepository.findByOwner_IdOrderByCreatedAtDesc(ownerId).stream()
+				.map(hotel -> modelMapper.map(hotel, HotelDto.class))
+				.toList();
+	}
+
+	@Override
+	@Transactional
+	public HotelDto getHotelById(Long id, Long ownerId) {
 
 		logger.info("Getting hotel with id: "+ id);
 
-		Hotel hotel=  hotelRepository
-				.findById(id)
-				.orElseThrow(() -> new ResourceNotFoundException("Hotel not found with id: " + id));
+		Hotel hotel = findOwnedHotel(id, ownerId);
 		
 		return modelMapper.map(hotel, HotelDto.class);
 	}
 
 	@Override
-	public HotelDto updateHotelById(Long id, HotelDto hotelDto) {
+	public HotelDto updateHotelById(Long id, HotelDto hotelDto, Long ownerId) {
 		
-		Hotel hotel=  hotelRepository
-				.findById(id)
-				.orElseThrow(() -> new ResourceNotFoundException("Hotel not found with id: " + id));
+		Hotel hotel = findOwnedHotel(id, ownerId);
+		var owner = hotel.getOwner();
+		var active = hotel.getIsActive();
 		
 		logger.info("Updating the hotel with ID: "+id);
 		
 		modelMapper.map(hotelDto, hotel);
 		hotel.setId(id);
+		hotel.setOwner(owner);
+		hotel.setIsActive(active);
 		
 		hotel = hotelRepository.save(hotel);
 		
@@ -89,10 +102,8 @@ public class HotelServiceImpl implements HotelService{
 
 	@Override
 	@Transactional
-	public Boolean deleteHotelById(Long id) {
-		Hotel hotel=  hotelRepository
-				.findById(id)
-				.orElseThrow(() -> new ResourceNotFoundException("Hotel not found with id: " + id));
+	public Boolean deleteHotelById(Long id, Long ownerId) {
+		Hotel hotel = findOwnedHotel(id, ownerId);
 		
 		logger.info("Deleting the hotel with ID: "+ id);
 		if (hotel.getRooms() != null) {
@@ -118,14 +129,12 @@ public class HotelServiceImpl implements HotelService{
 
 	@Override
 	@Transactional
-	public void activateHotel(Long id) {
+	public void activateHotel(Long id, Long ownerId) {
 		
 		logger.info("Activating the hotel with ID: "+id);
 
 		
-		Hotel hotel=  hotelRepository
-				.findById(id)
-				.orElseThrow(() -> new ResourceNotFoundException("Hotel not found with id: " + id));
+		Hotel hotel = findOwnedHotel(id, ownerId);
 		
 		
 		hotel.setIsActive(true);
@@ -137,6 +146,11 @@ public class HotelServiceImpl implements HotelService{
 		}
 		
 		
+	}
+
+	private Hotel findOwnedHotel(Long hotelId, Long ownerId) {
+		return hotelRepository.findByIdAndOwner_Id(hotelId, ownerId)
+				.orElseThrow(() -> new ResourceNotFoundException("Hotel not found with id: " + hotelId));
 	}
 
 	@Override
@@ -160,7 +174,6 @@ public class HotelServiceImpl implements HotelService{
 		return new HotelInfoDto(modelMapper.map(hotel, HotelDto.class), rooms);
 	}
 }
-
 
 
 
