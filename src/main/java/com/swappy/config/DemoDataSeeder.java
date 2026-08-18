@@ -8,12 +8,16 @@ import org.slf4j.LoggerFactory;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.context.annotation.Profile;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 import com.swappy.entities.Hotel;
 import com.swappy.entities.Room;
+import com.swappy.entities.User;
+import com.swappy.entities.enums.Role;
 import com.swappy.repository.HotelRepository;
 import com.swappy.repository.RoomRepository;
+import com.swappy.repository.UserRepository;
 import com.swappy.service.InventoryService;
 
 import jakarta.transaction.Transactional;
@@ -29,10 +33,15 @@ public class DemoDataSeeder implements ApplicationRunner {
     private final HotelRepository hotelRepository;
     private final RoomRepository roomRepository;
     private final InventoryService inventoryService;
+    private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
 
     @Override
     @Transactional
     public void run(ApplicationArguments args) {
+        seedUser("demo@stayly.local", "Stayly Guest", Role.GUEST);
+        seedUser("manager@stayly.local", "Stayly Manager", Role.HOTEL_MANAGER);
+
         if (hotelRepository.count() > 0) {
             logger.info("Demo data already exists; skipping seed");
             return;
@@ -61,6 +70,18 @@ public class DemoDataSeeder implements ApplicationRunner {
                                 List.of("Secure locker", "Reading light", "Guest kitchen"))));
 
         logger.info("Demo profile ready with {} hotels", hotelRepository.count());
+    }
+
+    private void seedUser(String email, String name, Role role) {
+        if (userRepository.findByEmailIgnoreCase(email).isPresent()) {
+            return;
+        }
+        User user = new User();
+        user.setEmail(email);
+        user.setName(name);
+        user.setPassword(passwordEncoder.encode("StaylyDemo123!"));
+        user.setRoles(java.util.Set.of(role));
+        userRepository.save(user);
     }
 
     private void seedHotel(String name, String city, List<String> amenities, List<Room> rooms) {

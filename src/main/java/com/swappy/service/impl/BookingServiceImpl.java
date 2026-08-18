@@ -13,6 +13,7 @@ import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 import com.swappy.dto.BookingDto;
 import com.swappy.dto.BookingRequest;
@@ -153,10 +154,9 @@ public class BookingServiceImpl implements BookingService{
 	        booking.setGuests(new HashSet<>());
 	    }
 
-	    User currentUser = getCurrentUser();
 	    for (GuestDto guestDto : guestDtoList) {
 	        Guest guest = modelMapper.map(guestDto, Guest.class);
-	        guest.setUser(currentUser);
+	        guest.setUser(booking.getUser());
 	        Guest savedGuest = guestRepository.save(guest);
 	        booking.getGuests().add(savedGuest);
 	    }
@@ -224,7 +224,29 @@ public class BookingServiceImpl implements BookingService{
 		Booking booking = bookingRepository.findByIdForUpdate(bookingId)
 				.orElseThrow(() -> new ResourceNotFoundException("Booking not found with id: " + bookingId));
 		validateManagementToken(booking, managementToken);
+		return cancelLockedBooking(booking);
+	}
 
+	@Override
+	@Transactional
+	public List<BookingDto> getBookingsForUser(Long userId) {
+		return bookingRepository.findByUser_IdOrderByCreatedAtDesc(userId).stream()
+				.map(this::toAccountDto)
+				.toList();
+	}
+
+	@Override
+	@Transactional
+	public BookingDto cancelBookingForUser(Long bookingId, Long userId) {
+		Booking booking = bookingRepository.findByIdForUpdate(bookingId)
+				.orElseThrow(() -> new ResourceNotFoundException("Booking not found with id: " + bookingId));
+		if (!booking.getUser().getId().equals(userId)) {
+			throw new ResourceNotFoundException("Booking not found with id: " + bookingId);
+		}
+		return withoutManagementToken(cancelLockedBooking(booking));
+	}
+
+	private BookingDto cancelLockedBooking(Booking booking) {
 		if (booking.getBookingStatus() == BookingStatus.CANCELLED) {
 			return toDto(booking);
 		}
@@ -270,6 +292,10 @@ public class BookingServiceImpl implements BookingService{
 	}
 
 	private User getCurrentUser() {
+		var authentication = SecurityContextHolder.getContext().getAuthentication();
+		if (authentication != null && authentication.getPrincipal() instanceof User user) {
+			return user;
+		}
 	    return userRepository.findByEmail(GUEST_EMAIL).orElseGet(() -> {
 	        User user = new User();
 	        user.setEmail(GUEST_EMAIL);
@@ -310,9 +336,15 @@ public class BookingServiceImpl implements BookingService{
 				.collect(java.util.stream.Collectors.toSet()));
 		return dto;
 	}
-	
+
+	private BookingDto toAccountDto(Booking booking) {
+		return withoutManagementToken(toDto(booking));
+	}
+
+	private BookingDto withoutManagementToken(BookingDto dto) {
+		dto.setManagementToken(null);
+		return dto;
+	}
+
 }
-
-
-
 

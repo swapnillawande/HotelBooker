@@ -1,6 +1,5 @@
 package com.swappy.dto;
 
-import com.swappy.entities.User;
 import com.swappy.entities.enums.Gender;
 
 import jakarta.validation.constraints.Max;
@@ -13,8 +12,6 @@ public class GuestDto {
 
 
 	private Long id;
-	
-	private User user;
 	
 	@NotBlank(message = "Guest name is required")
 	private String name;
@@ -31,10 +28,9 @@ public class GuestDto {
 
 	}
 
-	public GuestDto(Long id, User user, String name, Gender gender, Integer age) {
+	public GuestDto(Long id, String name, Gender gender, Integer age) {
 		super();
 		this.id = id;
-		this.user = user;
 		this.name = name;
 		this.gender = gender;
 		this.age = age;
@@ -46,14 +42,6 @@ public class GuestDto {
 
 	public void setId(Long id) {
 		this.id = id;
-	}
-
-	public User getUser() {
-		return user;
-	}
-
-	public void setUser(User user) {
-		this.user = user;
 	}
 
 	public String getName() {

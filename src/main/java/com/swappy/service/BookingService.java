@@ -19,6 +19,10 @@ public interface BookingService {
 
 	public BookingDto cancelBooking(Long bookingId, String managementToken);
 
+	public List<BookingDto> getBookingsForUser(Long userId);
+
+	public BookingDto cancelBookingForUser(Long bookingId, Long userId);
+
 	
 	
 }

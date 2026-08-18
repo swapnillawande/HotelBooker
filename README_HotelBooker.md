@@ -55,6 +55,9 @@ The project follows a layered architecture using:
 ### Booking Features
 - Initialize booking
 - Add guests to booking
+- Confirm and cancel bookings
+- Manage bookings with a private guest token
+- Register, sign in, and view account booking history
 
 ---
 
@@ -125,6 +128,18 @@ npm run dev
 
 Open [http://localhost:5173](http://localhost:5173). Demo data is recreated each
 time the API starts; the normal profile continues to use MySQL.
+
+Demo accounts:
+
+| Role | Email | Password |
+|---|---|---|
+| Guest | `demo@stayly.local` | `StaylyDemo123!` |
+| Hotel manager | `manager@stayly.local` | `StaylyDemo123!` |
+
+Authentication uses an opaque bearer token. Register or sign in through
+`/api/v1/auth/register` or `/api/v1/auth/login`, then send the returned token as
+`Authorization: Bearer <token>`. Account bookings are available at
+`/api/v1/account/bookings`.
 
 ---
 
