@@ -59,12 +59,18 @@ The shared client in `src/api/client.js` unwraps the API response envelope and c
 It also attaches the active bearer token automatically. Account sessions live in
 browser session storage and are validated with `/auth/me` whenever the app starts.
 
-The booking page intentionally separates the workflow into two stages:
+The booking page intentionally separates the workflow into three stages:
 
 1. initialize the booking and reserve inventory;
-2. attach validated guests to the same booking.
+2. attach validated guests to the same booking;
+3. tokenize the demo card in the browser and complete an idempotent payment.
 
 If guest submission fails, retrying does not create another inventory reservation. The backend expires abandoned reservations after ten minutes and returns their room counts to inventory.
+
+The demo checkout uses Visa `4242 4242 4242 4242`, any future expiry, and any
+three-digit CVC. Only `tok_demo_visa`, the cardholder name, and an idempotency
+key reach the API; raw card numbers, expiry dates, and CVC values are not sent or
+stored. This adapter is enabled only by the backend `demo` profile.
 
 Confirmed bookings include a private access code. The booking number and access
 code are required together to retrieve or cancel a guest booking; cancellation
