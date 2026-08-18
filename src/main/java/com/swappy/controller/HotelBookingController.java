@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import com.swappy.dto.BookingDto;
 import com.swappy.dto.BookingRequest;
 import com.swappy.dto.GuestDto;
+import com.swappy.dto.DemoPaymentRequest;
 import com.swappy.service.BookingService;
 
 import jakarta.validation.Valid;
@@ -51,6 +52,16 @@ public class HotelBookingController {
 			@PathVariable("bookingId") Long bookingId,
 			@RequestHeader("X-Booking-Token") String managementToken) {
 		return ResponseEntity.ok(bookingService.confirmBooking(bookingId, managementToken));
+	}
+
+	@PostMapping("/{bookingId}/pay")
+	public ResponseEntity<BookingDto> payBooking(
+			@PathVariable("bookingId") Long bookingId,
+			@RequestHeader("X-Booking-Token") String managementToken,
+			@RequestHeader("Idempotency-Key") String idempotencyKey,
+			@Valid @RequestBody DemoPaymentRequest request) {
+		return ResponseEntity.ok(bookingService.payBooking(
+				bookingId, managementToken, idempotencyKey, request));
 	}
 
 	@GetMapping("/{bookingId}")

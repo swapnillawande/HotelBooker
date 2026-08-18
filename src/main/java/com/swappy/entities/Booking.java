@@ -84,6 +84,9 @@ public class Booking {
 
 	@Column(nullable = false, precision = 10, scale = 2)
 	private BigDecimal amount;
+
+	@OneToOne(mappedBy = "booking", fetch = FetchType.LAZY)
+	private Payment payment;
 	
 	public Long getId() {
 		return id;
@@ -234,6 +237,14 @@ public class Booking {
 	public void setAmount(BigDecimal amount) {
 		this.amount = amount;
 	}
+
+	public Payment getPayment() {
+		return payment;
+	}
+
+	public void setPayment(Payment payment) {
+		this.payment = payment;
+	}
 	
     
     
@@ -241,7 +252,6 @@ public class Booking {
     
     
 }
-
 
 
 

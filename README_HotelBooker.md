@@ -56,6 +56,7 @@ The project follows a layered architecture using:
 - Initialize booking
 - Add guests to booking
 - Confirm and cancel bookings
+- Complete an idempotent demo payment before confirmation
 - Manage bookings with a private guest token
 - Register, sign in, and view account booking history
 
@@ -140,6 +141,10 @@ Authentication uses an opaque bearer token. Register or sign in through
 `/api/v1/auth/register` or `/api/v1/auth/login`, then send the returned token as
 `Authorization: Bearer <token>`. Account bookings are available at
 `/api/v1/account/bookings`.
+
+The demo profile also enables the checkout token `tok_demo_visa`. Raw card
+details are never accepted by the API. Demo payments are disabled by default in
+the normal profile so a real payment provider can replace this adapter safely.
 
 ---
 

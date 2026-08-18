@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.swappy.dto.BookingDto;
 import com.swappy.dto.BookingRequest;
+import com.swappy.dto.DemoPaymentRequest;
 import com.swappy.dto.GuestDto;
 
 public interface BookingService {
@@ -14,6 +15,8 @@ public interface BookingService {
 	public BookingDto addGuests(Long bookingId, String managementToken, List<GuestDto> guestDtoList);
 
 	public BookingDto confirmBooking(Long bookingId, String managementToken);
+
+	public BookingDto payBooking(Long bookingId, String managementToken, String idempotencyKey, DemoPaymentRequest request);
 
 	public BookingDto getBooking(Long bookingId, String managementToken);
 
