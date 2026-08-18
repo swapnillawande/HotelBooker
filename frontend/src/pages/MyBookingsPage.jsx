@@ -60,6 +60,7 @@ export default function MyBookingsPage() {
                 <div className="trip-heading"><div><span className="eyebrow">{hotel?.city || `Hotel #${booking.hotelId}`}</span><h2>{hotel?.name || `Stayly hotel #${booking.hotelId}`}</h2></div><span className={`status-chip ${booking.bookingStatus === 'CONFIRMED' ? 'active' : ''}`}>{booking.bookingStatus.replace('_', ' ')}</span></div>
                 <dl><div><dt>Check in</dt><dd>{booking.checkInDate}</dd></div><div><dt>Check out</dt><dd>{booking.checkOutDate}</dd></div><div><dt>Rooms</dt><dd>{booking.roomsCount}</dd></div><div><dt>Total</dt><dd>€{booking.amount}</dd></div></dl>
                 <p className="trip-guests"><strong>Guests:</strong> {booking.guests?.map((guest) => guest.name).join(', ') || 'Not added yet'}</p>
+                {booking.paymentStatus && <p className="trip-payment"><strong>Payment:</strong> {booking.paymentStatus.replace('_', ' ')}{booking.paymentReference ? ` · ${booking.paymentReference}` : ''}</p>}
                 {canCancel(booking) ? <button className="danger-button" disabled={cancellingId === booking.id} onClick={() => cancel(booking)}>{cancellingId === booking.id ? 'Cancelling…' : 'Cancel booking'}</button> : <p className="cancellation-note">This booking can no longer be cancelled online.</p>}
               </div>
             </article>

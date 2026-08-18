@@ -149,6 +149,10 @@ footer small { text-align:right; }
 .room-price strong { font:800 36px 'Manrope'; margin:4px 0 18px; }
 .room-price .primary-button { padding:13px 18px; border-radius:10px; }
 .booking-page { min-height:calc(100vh - 78px); background:var(--cream); padding:65px 24px 100px; }
+.checkout-steps { max-width:1050px; margin:0 auto 22px; display:grid; grid-template-columns:repeat(3,1fr); gap:8px; }
+.checkout-steps span { padding:10px 14px; border-bottom:3px solid #d6d7d1; color:#84908c; font-size:12px; font-weight:800; }
+.checkout-steps span.active { border-color:var(--coral); color:var(--coral); }
+.checkout-steps span.complete { border-color:var(--forest); color:var(--forest); }
 .booking-layout { max-width:1050px; margin:auto; display:grid; grid-template-columns:1.4fr .8fr; gap:30px; align-items:start; }
 .guest-form,.booking-summary,.success-card { background:white; border-radius:22px; padding:36px; }
 .guest-form>h1 { font-size:44px; letter-spacing:-2.5px; margin:8px 0 10px; }
@@ -174,6 +178,15 @@ footer small { text-align:right; }
 .form-message { padding:13px 16px; border-radius:10px; margin:16px 0; font-size:13px; }
 .form-message.error { background:#ffebe6; color:#9d321e; }
 .form-message.success { background:#e0f2e5; color:#25643c; }
+.payment-form { display:grid; gap:15px; margin-top:24px; padding-top:24px; border-top:1px solid var(--line); }
+.demo-payment-banner { display:grid; gap:4px; padding:15px 17px; border-radius:12px; background:#fff4d8; color:#705718; font-size:13px; }
+.demo-payment-banner span { color:#846f3b; font-size:12px; line-height:1.5; }
+.secure-payment-note { color:var(--muted); font-size:12px; line-height:1.5; }
+.summary-payment-note { display:block; margin-top:12px; color:var(--muted); text-align:right; }
+.payment-confirmation { margin:22px auto; padding:18px; max-width:370px; display:grid; gap:5px; border-radius:14px; background:var(--forest); color:white; }
+.payment-confirmation small { color:#bfd4cd; text-transform:uppercase; font-weight:800; letter-spacing:.8px; }
+.payment-confirmation strong { font:800 30px 'Manrope'; }
+.payment-confirmation code { color:#d5e4df; overflow-wrap:anywhere; font-size:11px; }
 .success-card { max-width:600px; margin:50px auto; text-align:center; }
 .success-card>span { display:grid; place-items:center; width:75px; height:75px; margin:auto; border-radius:50%; background:var(--mint); font-size:34px; }
 .success-card h1 { font-size:48px; margin:22px 0 10px; }
@@ -225,8 +238,8 @@ footer small { text-align:right; }
 .managed-booking-card dl div { padding:16px 10px; }
 .managed-booking-card dt { color:var(--muted); font-size:12px; }
 .managed-booking-card dd { margin:5px 0 0; font-weight:800; }
-.managed-guests { display:grid; gap:6px; }
-.managed-guests span,.cancellation-note { color:var(--muted); }
+.managed-guests,.managed-payment { display:grid; gap:6px; }
+.managed-guests span,.managed-payment span,.cancellation-note { color:var(--muted); overflow-wrap:anywhere; }
 .managed-booking-card .danger-button { justify-self:start; }
 .account-page { min-height:calc(100vh - 78px); display:grid; grid-template-columns:1.05fr .95fr; background:var(--cream); }
 .account-promo { background:var(--forest); color:white; padding:clamp(60px,9vw,125px); display:flex; flex-direction:column; justify-content:center; position:relative; overflow:hidden; }
@@ -271,6 +284,7 @@ footer small { text-align:right; }
 .trip-content dt { color:var(--muted); font-size:11px; }
 .trip-content dd { margin:5px 0 0; font-weight:800; }
 .trip-guests { color:var(--muted); font-size:13px; }
+.trip-payment { color:#467067; font-size:12px; overflow-wrap:anywhere; }
 .trip-content .danger-button { margin-top:5px; }
 .trips-empty { min-height:290px; background:white; border-radius:20px; box-shadow:0 12px 35px rgba(23,58,52,.09); display:grid; place-items:center; align-content:center; gap:8px; text-align:center; padding:40px; color:var(--muted); }
 .trips-empty>span { font-size:35px; }
@@ -337,6 +351,8 @@ footer small { text-align:right; }
   .room-visual { min-height:150px; }
   .room-price { grid-column:auto; flex-wrap:wrap; }
   .booking-page { padding:30px 14px 70px; }
+  .checkout-steps { margin-bottom:15px; }
+  .checkout-steps span { padding-inline:7px; font-size:11px; }
   .guest-form,.booking-summary { padding:24px; }
   .booking-summary img { width:calc(100% + 48px); margin:-24px -24px 24px; }
   .form-row { grid-template-columns:1fr; }
