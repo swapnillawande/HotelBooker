@@ -29,6 +29,7 @@ import com.swappy.dto.BookingDto;
 import com.swappy.dto.BookingRequest;
 import com.swappy.dto.GuestDto;
 import com.swappy.dto.DemoPaymentRequest;
+import com.swappy.dto.ManagerBookingDashboardDto;
 import com.swappy.entities.Booking;
 import com.swappy.entities.Guest;
 import com.swappy.entities.Hotel;
@@ -282,6 +283,40 @@ class BookingServiceImplTests {
 
         assertThrows(ResourceNotFoundException.class,
                 () -> bookingService.getBooking(10L, "wrong-token"));
+    }
+
+    @Test
+    void managerDashboardAggregatesOnlyConfirmedPaidRevenueAndUpcomingArrivals() {
+        Booking confirmed = reservedBooking();
+        confirmed.setBookingStatus(BookingStatus.CONFIRMED);
+        confirmed.setCheckInDate(LocalDate.now().plusDays(3));
+        Guest guest = new Guest();
+        guest.setName("Alex Doe");
+        confirmed.setGuests(Set.of(guest));
+        Payment confirmedPayment = new Payment();
+        confirmedPayment.setPaymentStatus(PaymentStatus.CONFIRMED);
+        confirmed.setPayment(confirmedPayment);
+
+        Booking cancelled = reservedBooking();
+        cancelled.setId(11L);
+        cancelled.setBookingStatus(BookingStatus.CANCELLED);
+        cancelled.setAmount(new BigDecimal("90.00"));
+        Payment refunded = new Payment();
+        refunded.setPaymentStatus(PaymentStatus.REFUNDED);
+        cancelled.setPayment(refunded);
+
+        when(bookingRepository.findByHotel_Owner_IdOrderByCheckInDateAsc(44L))
+                .thenReturn(List.of(confirmed, cancelled));
+
+        ManagerBookingDashboardDto dashboard = bookingService.getManagerBookingDashboard(44L);
+
+        assertEquals(2, dashboard.totalBookings());
+        assertEquals(1, dashboard.confirmedBookings());
+        assertEquals(1, dashboard.arrivalsNextSevenDays());
+        assertEquals(new BigDecimal("40.00"), dashboard.confirmedRevenue());
+        assertEquals("Stayly Berlin", dashboard.bookings().get(0).hotelName());
+        assertEquals("Alex Doe", dashboard.bookings().get(0).leadGuest());
+        assertEquals(1, dashboard.bookings().get(0).guestCount());
     }
 
     private BookingRequest request(LocalDate checkIn, LocalDate checkOut, int roomsCount) {
