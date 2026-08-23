@@ -51,7 +51,7 @@ VITE_ENABLE_DEMO_FALLBACK=true npm run dev
 | `/manage-booking` | Protected booking lookup and cancellation |
 | `/account` | Sign in and account registration |
 | `/my-bookings` | Authenticated booking history and cancellation |
-| `/admin` | Manager-owned property portfolio and room administration |
+| `/admin` | Manager-owned properties, rooms, reservations, arrivals, and revenue |
 
 ## Backend integration
 
