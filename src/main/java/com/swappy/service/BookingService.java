@@ -6,6 +6,7 @@ import com.swappy.dto.BookingDto;
 import com.swappy.dto.BookingRequest;
 import com.swappy.dto.DemoPaymentRequest;
 import com.swappy.dto.GuestDto;
+import com.swappy.dto.ManagerBookingDashboardDto;
 
 public interface BookingService {
 
@@ -25,6 +26,8 @@ public interface BookingService {
 	public List<BookingDto> getBookingsForUser(Long userId);
 
 	public BookingDto cancelBookingForUser(Long bookingId, Long userId);
+
+	public ManagerBookingDashboardDto getManagerBookingDashboard(Long ownerId);
 
 	
 	

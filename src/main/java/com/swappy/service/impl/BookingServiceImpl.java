@@ -20,6 +20,8 @@ import com.swappy.dto.BookingDto;
 import com.swappy.dto.BookingRequest;
 import com.swappy.dto.GuestDto;
 import com.swappy.dto.DemoPaymentRequest;
+import com.swappy.dto.ManagerBookingDashboardDto;
+import com.swappy.dto.ManagerBookingDto;
 import com.swappy.entities.Booking;
 import com.swappy.entities.Guest;
 import com.swappy.entities.Hotel;
@@ -325,6 +327,64 @@ public class BookingServiceImpl implements BookingService{
 			throw new ResourceNotFoundException("Booking not found with id: " + bookingId);
 		}
 		return withoutManagementToken(cancelLockedBooking(booking));
+	}
+
+	@Override
+	@Transactional
+	public ManagerBookingDashboardDto getManagerBookingDashboard(Long ownerId) {
+		List<Booking> bookings = bookingRepository.findByHotel_Owner_IdOrderByCheckInDateAsc(ownerId);
+		LocalDate today = LocalDate.now();
+		LocalDate nextWeek = today.plusDays(7);
+		long confirmedBookings = bookings.stream()
+				.filter(booking -> booking.getBookingStatus() == BookingStatus.CONFIRMED)
+				.count();
+		long arrivalsNextSevenDays = bookings.stream()
+				.filter(booking -> booking.getBookingStatus() == BookingStatus.CONFIRMED)
+				.filter(booking -> !booking.getCheckInDate().isBefore(today))
+				.filter(booking -> !booking.getCheckInDate().isAfter(nextWeek))
+				.count();
+		BigDecimal confirmedRevenue = bookings.stream()
+				.filter(this::hasConfirmedPayment)
+				.map(Booking::getAmount)
+				.reduce(BigDecimal.ZERO, BigDecimal::add);
+
+		return new ManagerBookingDashboardDto(
+				bookings.size(),
+				confirmedBookings,
+				arrivalsNextSevenDays,
+				confirmedRevenue,
+				bookings.stream().map(this::toManagerDto).toList());
+	}
+
+	private boolean hasConfirmedPayment(Booking booking) {
+		return booking.getBookingStatus() == BookingStatus.CONFIRMED
+				&& booking.getPayment() != null
+				&& booking.getPayment().getPaymentStatus() == PaymentStatus.CONFIRMED;
+	}
+
+	private ManagerBookingDto toManagerDto(Booking booking) {
+		Payment payment = booking.getPayment();
+		Set<Guest> guests = booking.getGuests() == null ? Set.of() : booking.getGuests();
+		String leadGuest = guests.stream()
+				.map(Guest::getName)
+				.filter(java.util.Objects::nonNull)
+				.sorted(String.CASE_INSENSITIVE_ORDER)
+				.findFirst()
+				.orElse("Guest details pending");
+		return new ManagerBookingDto(
+				booking.getId(),
+				booking.getHotel().getId(),
+				booking.getHotel().getName(),
+				booking.getRoom().getType(),
+				booking.getCheckInDate(),
+				booking.getCheckOutDate(),
+				booking.getCreatedAt(),
+				booking.getRoomsCount(),
+				guests.size(),
+				leadGuest,
+				booking.getBookingStatus(),
+				payment == null ? null : payment.getPaymentStatus(),
+				booking.getAmount());
 	}
 
 	private BookingDto cancelLockedBooking(Booking booking) {

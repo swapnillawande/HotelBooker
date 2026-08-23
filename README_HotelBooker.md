@@ -39,6 +39,7 @@ The project follows a layered architecture using:
 - Delete hotel
 - Get hotel by ID
 - Enforce property ownership across hotel and room administration
+- View owned-property reservations, upcoming arrivals, and confirmed revenue
 
 ### Room Management
 - Create rooms for a hotel
