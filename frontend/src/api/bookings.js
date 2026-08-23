@@ -25,3 +25,7 @@ export function getBooking(bookingId, managementToken) {
 export function cancelBooking(bookingId, managementToken) {
   return apiRequest(`/bookings/${bookingId}/cancel`, { method: 'POST', headers: bookingHeaders(managementToken) })
 }
+
+export function getManagerBookingDashboard() {
+  return apiRequest('/admin/bookings')
+}

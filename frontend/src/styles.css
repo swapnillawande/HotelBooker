@@ -208,6 +208,7 @@ footer small { text-align:right; }
 .admin-metrics { display:flex; gap:10px; flex-wrap:wrap; justify-content:flex-end; }
 .admin-metrics span { min-width:112px; padding:14px 16px; border:1px solid rgba(255,255,255,.18); border-radius:14px; display:grid; color:#c8d9d4; font-size:11px; }
 .admin-metrics strong { color:white; font:800 28px 'Manrope'; }
+.admin-metrics span:first-child { min-width:165px; }
 .admin-shell { max-width:1188px; margin:-45px auto 0; padding:0 24px 100px; position:relative; }
 .property-toolbar { min-height:90px; padding:17px 20px; display:flex; align-items:center; justify-content:space-between; gap:18px; background:white; border-radius:18px 18px 0 0; }
 .property-toolbar h2 { margin:4px 0 0; }
@@ -244,6 +245,30 @@ footer small { text-align:right; }
 .admin-room-list span { display:grid; gap:3px; }
 .admin-room-list small { color:var(--muted); }
 .icon-danger { width:34px; height:34px; padding:0; font-size:20px; }
+.reservation-panel { margin-top:24px; padding:30px; border-radius:20px; background:white; }
+.reservation-heading { display:flex; align-items:end; justify-content:space-between; gap:25px; border-bottom:1px solid var(--line); padding-bottom:22px; }
+.reservation-heading h2 { margin:5px 0; font-size:32px; }
+.reservation-heading p { margin:0; color:var(--muted); font-size:13px; }
+.reservation-filters { display:flex; gap:10px; }
+.reservation-filters label { display:grid; gap:6px; color:var(--muted); font-size:11px; font-weight:800; }
+.reservation-filters select { min-width:155px; padding:10px 12px; border:1px solid var(--line); border-radius:10px; background:#fbfaf7; color:var(--ink); }
+.reservation-list { display:grid; }
+.reservation-card { display:grid; grid-template-columns:1.2fr 1.1fr 1fr .75fr; gap:18px; align-items:center; padding:19px 8px; border-bottom:1px solid #edf0ee; }
+.reservation-card:last-child { border-bottom:0; }
+.reservation-card>div { min-width:0; }
+.reservation-card small,.reservation-card span { color:var(--muted); font-size:11px; }
+.reservation-card strong { overflow:hidden; text-overflow:ellipsis; }
+.reservation-guest { display:flex; align-items:center; gap:11px; }
+.reservation-guest>div,.reservation-property,.reservation-dates,.reservation-value { display:grid; gap:4px; }
+.reservation-avatar { flex:0 0 40px; height:40px; display:grid; place-items:center; border-radius:12px; background:var(--sun); color:var(--ink)!important; font-weight:800; font-size:16px!important; }
+.reservation-value { justify-items:end; text-align:right; }
+.reservation-value .status-chip { color:#715713; }
+.reservation-value .status-chip.active { color:#28613b; }
+.reservation-value>strong { font:800 20px 'Manrope'; }
+.reservation-empty { min-height:210px; display:grid; place-items:center; align-content:center; gap:5px; color:var(--muted); text-align:center; }
+.reservation-empty>span { font-size:30px; color:var(--coral); }
+.reservation-empty h3 { margin:3px 0 0; color:var(--ink); }
+.reservation-empty p { margin:0; }
 .success-actions { display:flex; gap:12px; justify-content:center; flex-wrap:wrap; margin-top:24px; }
 .booking-access-code { margin:25px auto 0; max-width:560px; padding:18px; border-radius:14px; background:#f7f7f3; text-align:left; }
 .booking-access-code small { display:block; color:var(--muted); font-weight:800; margin-bottom:8px; }
@@ -337,6 +362,8 @@ footer small { text-align:right; }
   .admin-header { align-items:start; flex-direction:column; }
   .admin-metrics { justify-content:flex-start; }
   .property-list { grid-template-columns:1fr 1fr; }
+  .reservation-card { grid-template-columns:1fr 1fr; }
+  .reservation-value { justify-items:start; text-align:left; }
   .booking-lookup { grid-template-columns:1fr; }
   .account-page { grid-template-columns:1fr; }
   .account-promo { padding:70px 9%; }
@@ -392,6 +419,9 @@ footer small { text-align:right; }
   .admin-toolbar label { flex-basis:100%; }
   .admin-shell { padding-inline:14px; }
   .property-list { grid-template-columns:1fr; }
+  .reservation-panel { padding:22px 16px; }
+  .reservation-heading,.reservation-filters { align-items:stretch; flex-direction:column; }
+  .reservation-card { grid-template-columns:1fr; padding:20px 4px; }
   .manage-booking-intro h1 { font-size:37px; }
   .manage-booking-shell { padding-inline:14px; }
   .managed-booking-card dl { grid-template-columns:1fr 1fr; }
